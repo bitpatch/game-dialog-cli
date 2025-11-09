@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Dialog",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Dialog/bin/Debug/net9.0/dialog.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Dialog",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        }
+    ]
+}
