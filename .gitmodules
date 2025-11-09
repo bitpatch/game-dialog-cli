@@ -1,0 +1,3 @@
+[submodule "DialogLang"]
+	path = DialogLang
+	url = https://github.com/denis-kondratev/dialog-lang.git
