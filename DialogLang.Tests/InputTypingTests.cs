@@ -55,11 +55,38 @@ namespace DialogLang.Tests
             var inputRequest = (RequestNumber)enumerator.Current!;
             Assert.Equal("x", inputRequest.VariableName);
             
+            // Set with a whole number - should be stored as int
             inputRequest.Set(21.0);
             
-            // Next result should be the output
+            // Next result should be the output (int * int = int)
             Assert.True(enumerator.MoveNext());
-            Assert.Equal(42.0, enumerator.Current);
+            Assert.Equal(42, enumerator.Current);
+            
+            Assert.False(enumerator.MoveNext());
+        }
+
+        [Fact]
+        public void TestInputRequestNumber_WithFloat()
+        {
+            // Arrange
+            var interpreter = new Interpreter(new TestLogger());
+            var script = ">> x as number\n<< x * 2";
+            
+            // Act & Assert
+            var enumerator = interpreter.Run(script).GetEnumerator();
+            
+            // First result should be RequestNumber
+            Assert.True(enumerator.MoveNext());
+            Assert.IsAssignableFrom<RequestNumber>(enumerator.Current);
+            
+            var inputRequest = (RequestNumber)enumerator.Current!;
+            
+            // Set with a decimal number - should be stored as float
+            inputRequest.Set(21.5);
+            
+            // Next result should be the output (float * int = float)
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal(43.0f, enumerator.Current);
             
             Assert.False(enumerator.MoveNext());
         }

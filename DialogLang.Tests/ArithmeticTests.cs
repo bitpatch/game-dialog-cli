@@ -26,7 +26,6 @@ namespace DialogLang.Tests
         [InlineData("5 + 3", 8)]
         [InlineData("10 - 4", 6)]
         [InlineData("6 * 7", 42)]
-        [InlineData("20 / 5", 4)]
         [InlineData("10 + 5 - 3 * 2", 9)] // 10 + 5 - 6 = 9
         public void BasicArithmetic_ShouldReturnCorrectResult(string expression, int expected)
         {
@@ -34,39 +33,77 @@ namespace DialogLang.Tests
             Assert.Equal(expected, result);
         }
 
+        [Fact]
+        public void IntegerDivision_ShouldReturnFloat()
+        {
+            // Division always returns float, even for whole number results
+            var result = EvaluateExpression("20 / 5");
+            Assert.NotNull(result);
+            Assert.IsType<float>(result);
+            Assert.Equal(4.0f, (float)result, precision: 3);
+        }
+
+        [Fact]
+        public void Division_ShouldProduceAccurateResults()
+        {
+            // 3 / 2 should be 1.5, not 1
+            var result = EvaluateExpression("3 / 2");
+            Assert.NotNull(result);
+            Assert.IsType<float>(result);
+            Assert.Equal(1.5f, (float)result, precision: 3);
+        }
+
         [Theory]
         [InlineData("2 + 3 * 4", 14)] // multiplication before addition
         [InlineData("10 - 2 * 3", 4)] // multiplication before subtraction
-        [InlineData("8 / 2 + 3", 7)] // division before addition
         public void OperatorPrecedence_ShouldRespectMultiplicationAndDivisionFirst(string expression, int expected)
         {
             var result = EvaluateExpression(expression);
             Assert.Equal(expected, result);
         }
 
+        [Fact]
+        public void OperatorPrecedence_WithDivision_ShouldReturnFloat()
+        {
+            // 8 / 2 + 3 = 4.0 + 3 = 7.0 (division produces float)
+            var result = EvaluateExpression("8 / 2 + 3");
+            Assert.NotNull(result);
+            Assert.IsType<float>(result);
+            Assert.Equal(7.0f, (float)result, precision: 3);
+        }
+
         [Theory]
         [InlineData("(2 + 3) * 4", 20)]
         [InlineData("((10 + 5) * 2) - 6", 24)]
-        [InlineData("(8 - 2) / 3", 2)]
         public void Parentheses_ShouldOverrideOperatorPrecedence(string expression, int expected)
         {
             var result = EvaluateExpression(expression);
             Assert.Equal(expected, result);
         }
 
+        [Fact]
+        public void Parentheses_WithDivision_ShouldReturnFloat()
+        {
+            // (8 - 2) / 3 = 6 / 3 = 2.0 (division produces float)
+            var result = EvaluateExpression("(8 - 2) / 3");
+            Assert.NotNull(result);
+            Assert.IsType<float>(result);
+            Assert.Equal(2.0f, (float)result, precision: 3);
+        }
+
         [Theory]
-        [InlineData("5.5 + 2.5", 8.0)]
-        [InlineData("10.0 / 4.0", 2.5)]
-        [InlineData("3.5 * 2.0", 7.0)]
-        public void DecimalNumbers_ShouldWorkCorrectly(string expression, double expected)
+        [InlineData("5.5 + 2.5", 8.0f)]
+        [InlineData("10.0 / 4.0", 2.5f)]
+        [InlineData("3.5 * 2.0", 7.0f)]
+        public void DecimalNumbers_ShouldWorkCorrectly(string expression, float expected)
         {
             var result = EvaluateExpression(expression);
             Assert.NotNull(result);
-            Assert.True(result is double || result is float, $"Expected numeric type, but got {result.GetType()}");
+            Assert.IsType<float>(result);
             
-            var doubleResult = Convert.ToDouble(result);
-            Assert.True(Math.Abs(doubleResult - expected) < 0.001, 
-                $"Expected {expected}, but got {doubleResult} for expression '{expression}'");
+            var floatResult = (float)result;
+            Assert.True(Math.Abs(floatResult - expected) < 0.001f, 
+                $"Expected {expected}, but got {floatResult} for expression '{expression}'");
         }
 
         [Fact]
