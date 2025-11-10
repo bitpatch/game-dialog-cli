@@ -1,8 +1,1 @@
-<< "Hello World!"
-a = 20
-b = 10
-Log ("20 + 10 is " + (a + b))
-Log ("But 20 / 10 is " + (a / b))
-<< "Say my name"
->> name
-<< "My name is " + name
+<< 5.5 + 2.5

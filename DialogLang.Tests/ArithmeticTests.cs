@@ -22,75 +22,57 @@ namespace DialogLang.Tests
             return results.FirstOrDefault();
         }
 
-        [Fact]
-        public void Addition_ShouldReturnCorrectResult()
+        [Theory]
+        [InlineData("5 + 3", 8)]
+        [InlineData("10 - 4", 6)]
+        [InlineData("6 * 7", 42)]
+        [InlineData("20 / 5", 4)]
+        [InlineData("10 + 5 - 3 * 2", 9)] // 10 + 5 - 6 = 9
+        public void BasicArithmetic_ShouldReturnCorrectResult(string expression, int expected)
         {
-            var result = EvaluateExpression("5 + 3");
-            Assert.Equal(8, result);
+            var result = EvaluateExpression(expression);
+            Assert.Equal(expected, result);
         }
 
-        [Fact]
-        public void Subtraction_ShouldReturnCorrectResult()
+        [Theory]
+        [InlineData("2 + 3 * 4", 14)] // multiplication before addition
+        [InlineData("10 - 2 * 3", 4)] // multiplication before subtraction
+        [InlineData("8 / 2 + 3", 7)] // division before addition
+        public void OperatorPrecedence_ShouldRespectMultiplicationAndDivisionFirst(string expression, int expected)
         {
-            var result = EvaluateExpression("10 - 4");
-            Assert.Equal(6, result);
+            var result = EvaluateExpression(expression);
+            Assert.Equal(expected, result);
         }
 
-        [Fact]
-        public void Multiplication_ShouldReturnCorrectResult()
+        [Theory]
+        [InlineData("(2 + 3) * 4", 20)]
+        [InlineData("((10 + 5) * 2) - 6", 24)]
+        [InlineData("(8 - 2) / 3", 2)]
+        public void Parentheses_ShouldOverrideOperatorPrecedence(string expression, int expected)
         {
-            var result = EvaluateExpression("6 * 7");
-            Assert.Equal(42, result);
+            var result = EvaluateExpression(expression);
+            Assert.Equal(expected, result);
         }
 
-        [Fact]
-        public void Division_ShouldReturnCorrectResult()
+        [Theory]
+        [InlineData("5.5 + 2.5", 8.0f)]
+        [InlineData("10.0 / 4.0", 2.5f)]
+        [InlineData("3.5 * 2.0", 7.0f)]
+        public void DecimalNumbers_ShouldWorkCorrectly(string expression, float expected)
         {
-            var result = EvaluateExpression("20 / 5");
-            Assert.Equal(4, result);
+            var result = EvaluateExpression(expression);
+            Assert.NotNull(result);
+            Assert.IsType<float>(result);
+            
+            var floatResult = (float)result;
+            Assert.True(Math.Abs(floatResult - expected) < 0.001f, 
+                $"Expected {expected}, but got {floatResult} for expression '{expression}'");
         }
 
         [Fact]
         public void DivisionByZero_ShouldThrowException()
         {
             Assert.Throws<DivideByZeroException>(() => EvaluateExpression("10 / 0"));
-        }
-
-        [Fact]
-        public void ComplexExpression_ShouldRespectOperatorPrecedence()
-        {
-            // 2 + 3 * 4 should equal 14, not 20
-            var result = EvaluateExpression("2 + 3 * 4");
-            Assert.Equal(14, result);
-        }
-
-        [Fact]
-        public void ParenthesesExpression_ShouldRespectParentheses()
-        {
-            // (2 + 3) * 4 should equal 20
-            var result = EvaluateExpression("(2 + 3) * 4");
-            Assert.Equal(20, result);
-        }
-
-        [Fact]
-        public void MultipleOperations_ShouldReturnCorrectResult()
-        {
-            var result = EvaluateExpression("10 + 5 - 3 * 2");
-            Assert.Equal(9, result); // 10 + 5 - 6 = 9
-        }
-
-        [Fact]
-        public void NestedParentheses_ShouldWorkCorrectly()
-        {
-            var result = EvaluateExpression("((10 + 5) * 2) - 6");
-            Assert.Equal(24, result); // (15 * 2) - 6 = 24
-        }
-
-        [Fact]
-        public void DecimalNumbers_ShouldWorkCorrectly()
-        {
-            var result = EvaluateExpression("5.5 + 2.5");
-            Assert.Equal(8.0f, result);
         }
 
         [Fact]
