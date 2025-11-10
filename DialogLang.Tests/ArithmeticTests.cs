@@ -55,18 +55,18 @@ namespace DialogLang.Tests
         }
 
         [Theory]
-        [InlineData("5.5 + 2.5", 8.0f)]
-        [InlineData("10.0 / 4.0", 2.5f)]
-        [InlineData("3.5 * 2.0", 7.0f)]
-        public void DecimalNumbers_ShouldWorkCorrectly(string expression, float expected)
+        [InlineData("5.5 + 2.5", 8.0)]
+        [InlineData("10.0 / 4.0", 2.5)]
+        [InlineData("3.5 * 2.0", 7.0)]
+        public void DecimalNumbers_ShouldWorkCorrectly(string expression, double expected)
         {
             var result = EvaluateExpression(expression);
             Assert.NotNull(result);
-            Assert.IsType<float>(result);
+            Assert.True(result is double || result is float, $"Expected numeric type, but got {result.GetType()}");
             
-            var floatResult = (float)result;
-            Assert.True(Math.Abs(floatResult - expected) < 0.001f, 
-                $"Expected {expected}, but got {floatResult} for expression '{expression}'");
+            var doubleResult = Convert.ToDouble(result);
+            Assert.True(Math.Abs(doubleResult - expected) < 0.001, 
+                $"Expected {expected}, but got {doubleResult} for expression '{expression}'");
         }
 
         [Fact]

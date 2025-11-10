@@ -1,1 +1,5 @@
-<< 5.5 + 2.5
+<< "Hi"
+>> val
+<< "Your value: " + val
+>> val as number
+<< "Your value: " + val

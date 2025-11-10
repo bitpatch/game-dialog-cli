@@ -22,12 +22,57 @@ try
     using var reader = new StreamReader(scriptPath);
     foreach (var result in interpreter.Run(reader))
     {
-        if (result is IInputRequest input)
+        if (result is Request input)
         {
-            // Handle input request
-            Console.Write("Input: ");
-            string? userInput = Console.ReadLine();
-            input.Set(userInput ?? "");
+            // Handle input request based on type
+            if (input is RequestNumber numberInput)
+            {
+                while (true)
+                {
+                    Console.Write($"Input (number) for '{numberInput.VariableName}': ");
+                    string? userInput = Console.ReadLine();
+                    
+                    if (double.TryParse(userInput, out double value))
+                    {
+                        numberInput.Set(value);
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid input. Please enter a valid number.");
+                    }
+                }
+            }
+            else if (input is RequestString stringInput)
+            {
+                Console.Write($"Input (string) for '{stringInput.VariableName}': ");
+                string? userInput = Console.ReadLine();
+                stringInput.Set(userInput ?? "");
+            }
+            else if (input is RequestBool boolInput)
+            {
+                while (true)
+                {
+                    Console.Write($"Input (bool: true/false) for '{boolInput.VariableName}': ");
+                    string? userInput = Console.ReadLine();
+                    
+                    if (bool.TryParse(userInput, out bool value))
+                    {
+                        boolInput.Set(value);
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid input. Please enter 'true' or 'false'.");
+                    }
+                }
+            }
+            else if (input is RequestAny anyInput)
+            {
+                Console.Write($"Input for '{anyInput.VariableName}': ");
+                string? userInput = Console.ReadLine();
+                anyInput.Set(userInput ?? "");
+            }
         }
         else if (result != null)
         {
