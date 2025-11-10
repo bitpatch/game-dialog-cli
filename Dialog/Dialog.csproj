@@ -8,4 +8,8 @@
     <AssemblyName>dialog</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DialogLang\DialogLang.csproj" />
+  </ItemGroup>
+
 </Project>

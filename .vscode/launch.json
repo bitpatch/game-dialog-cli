@@ -7,7 +7,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Dialog/bin/Debug/net9.0/dialog.dll",
-            "args": [],
+            "args": ["script.gds"],
             "cwd": "${workspaceFolder}/Dialog",
             "console": "integratedTerminal",
             "stopAtEntry": false
