@@ -37,7 +37,7 @@ try
 }
 catch (ScriptException ex)
 {
-    Console.WriteLine($"Error {ex.Message} (line {ex.Line}, column {ex.Column})");
+    Console.WriteLine($"{ex.Message}, line {ex.Line}");
     PrintScriptError(scriptPath, ex.Line, ex.Column);
     return 1;
 }
@@ -64,7 +64,7 @@ static void PrintScriptError(string scriptPath, int line, int column)
             return;
         }
 
-        string prefix = $"    Line {line}: ";
+        string prefix = "    ";
         Console.WriteLine(prefix + errorLine);
 
         int pointerColumn = Math.Max(column, 1);
