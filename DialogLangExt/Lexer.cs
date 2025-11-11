@@ -63,6 +63,9 @@ namespace BitPatch.DialogLang
                 // Newline (statement terminator) - skip consecutive newlines
                 '\n' => ReadNewline(startLine, startColumn),
 
+                // String literal
+                '"' => ReadString(startLine, startColumn),
+
                 // Integer number
                 >= '0' and <= '9' => ReadNumber(startLine, startColumn),
 
@@ -118,6 +121,61 @@ namespace BitPatch.DialogLang
             }
 
             return new Token(TokenType.Identifier, _buffer.ToString(), startLine, startColumn);
+        }
+
+        /// <summary>
+        /// Reads a string literal from the source (enclosed in double quotes)
+        /// </summary>
+        private Token ReadString(int startLine, int startColumn)
+        {
+            _buffer.Clear();
+
+            // Skip opening quote
+            MoveNextChar();
+
+            while (_current != -1 && (char)_current != '"')
+            {
+                if ((char)_current == '\\')
+                {
+                    // Handle escape sequences
+                    MoveNextChar();
+                    if (_current == -1)
+                    {
+                        throw new ScriptException("Unterminated string literal", startLine, startColumn);
+                    }
+
+                    var escapeChar = (char)_current;
+                    _buffer.Append(escapeChar switch
+                    {
+                        'n' => '\n',
+                        't' => '\t',
+                        'r' => '\r',
+                        '\\' => '\\',
+                        '"' => '"',
+                        _ => throw new ScriptException($"Invalid escape sequence: \\{escapeChar}", _line, _column)
+                    });
+                    MoveNextChar();
+                }
+                else if ((char)_current == '\n')
+                {
+                    throw new ScriptException("Unterminated string literal (newline in string)", _line, _column);
+                }
+                else
+                {
+                    _buffer.Append((char)_current);
+                    MoveNextChar();
+                }
+            }
+
+            if (_current == -1)
+            {
+                throw new ScriptException("Unterminated string literal", startLine, startColumn);
+            }
+
+            // Skip closing quote
+            MoveNextChar();
+
+            return new Token(TokenType.String, _buffer.ToString(), startLine, startColumn);
         }
 
         /// <summary>

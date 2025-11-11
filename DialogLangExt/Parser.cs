@@ -105,6 +105,12 @@ namespace BitPatch.DialogLang
                 return new Ast.Number(int.Parse(token.Value), token.Line, token.Column);
             }
 
+            if (token.Type == TokenType.String)
+            {
+                MoveNext();
+                return new Ast.String(token.Value, token.Line, token.Column);
+            }
+
             if (token.Type == TokenType.Identifier)
             {
                 MoveNext();

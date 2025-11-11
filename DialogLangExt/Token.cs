@@ -7,6 +7,7 @@ namespace BitPatch.DialogLang
     {
         // Literals
         Integer,        // 123, 456
+        String,         // "Hello World"
         Identifier,     // variable names
         
         // Operators

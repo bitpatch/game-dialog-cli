@@ -74,6 +74,11 @@ namespace BitPatch.DialogLang
                 return number.Value;
             }
 
+            if (expression is Ast.String str)
+            {
+                return str.Value;
+            }
+
             if (expression is Variable variable)
             {
                 if (_variables.TryGetValue(variable.Name, out var value))

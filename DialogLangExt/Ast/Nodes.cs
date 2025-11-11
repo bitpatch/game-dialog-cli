@@ -33,6 +33,11 @@ namespace BitPatch.DialogLang.Ast
     internal record Number(int Value, int Line, int Column) : Value(Line, Column);
 
     /// <summary>
+    /// Node representing a string literal
+    /// </summary>
+    internal record String(string Value, int Line, int Column) : Value(Line, Column);
+
+    /// <summary>
     /// Node representing a variable reference
     /// </summary>
     internal record Variable(string Name, int Line, int Column) : Expression(Line, Column);
