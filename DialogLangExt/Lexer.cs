@@ -30,12 +30,7 @@ namespace BitPatch.DialogLang
         {
             while (_current != -1)
             {
-                var token = GetNextToken();
-
-                if (token.Type != TokenType.Unknown)
-                {
-                    yield return token;
-                }
+                yield return ReadNextToken();
             }
 
             yield return new Token(TokenType.EndOfFile, string.Empty, _position);
@@ -44,7 +39,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Gets the next token from the source code
         /// </summary>
-        private Token GetNextToken()
+        private Token ReadNextToken()
         {
             if (_current == -1)
             {
@@ -77,7 +72,7 @@ namespace BitPatch.DialogLang
                 '=' => ReadSingleCharToken(TokenType.Assign, "=", startPosition),
 
                 // Unknown character
-                _ => ReadSingleCharToken(TokenType.Unknown, currentChar.ToString(), startPosition),
+                _ => throw new ScriptException($"Unknown character: '{currentChar}' at position {startPosition}")
             };
         }
 

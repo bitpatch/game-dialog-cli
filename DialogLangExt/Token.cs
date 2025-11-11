@@ -14,8 +14,7 @@ namespace BitPatch.DialogLang
         
         // Special
         Newline,        // End of line (statement terminator)
-        EndOfFile,
-        Unknown
+        EndOfFile
     }
 
     /// <summary>
