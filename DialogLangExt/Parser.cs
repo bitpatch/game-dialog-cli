@@ -70,7 +70,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses an expression (for now, just literals)
         /// </summary>
-        private Ast.Node ParseExpression()
+        private Ast.Expression ParseExpression()
         {
             return ParsePrimary();
         }
@@ -78,7 +78,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses primary expressions (numbers, variables)
         /// </summary>
-        private Ast.Node ParsePrimary()
+        private Ast.Expression ParsePrimary()
         {
             var token = _current;
 

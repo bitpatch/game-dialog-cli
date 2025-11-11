@@ -67,14 +67,14 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Evaluates an expression and returns its value
         /// </summary>
-        private object EvaluateExpression(Node node)
+        private object EvaluateExpression(Expression expression)
         {
-            if (node is Number number)
+            if (expression is Number number)
             {
                 return number.Value;
             }
 
-            if (node is Variable variable)
+            if (expression is Variable variable)
             {
                 if (_variables.TryGetValue(variable.Name, out var value))
                 {
@@ -83,7 +83,7 @@ namespace BitPatch.DialogLang
                 throw new Exception($"Variable '{variable.Name}' is not defined");
             }
 
-            throw new Exception($"Unknown expression type: {node.GetType().Name}");
+            throw new Exception($"Unknown expression type: {expression.GetType().Name}");
         }
 
         /// <summary>
