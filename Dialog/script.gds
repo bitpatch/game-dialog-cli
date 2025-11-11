@@ -1,5 +1,3 @@
-<< "Hi"
->> val
-<< "Your value: " + val
->> val as number
-<< "Your value: " + val
+a = 10
+b = 20
+result = 100
