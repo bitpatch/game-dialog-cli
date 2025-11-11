@@ -1,3 +1,8 @@
-a = "\"Hello World\""
-a = .
-b = a
+<< "Hi!"
+<< "How are you?"
+a = 10
+b = 20
+<< a
+<< b
+c = "test"
+<< c

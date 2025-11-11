@@ -21,16 +21,19 @@ namespace BitPatch.DialogLang
         public IReadOnlyDictionary<string, object> Variables => _variables;
 
         /// <summary>
-        /// Executes statements one by one as they arrive (streaming)
+        /// Executes statements one by one as they arrive (streaming), yielding output values
         /// </summary>
-        public void Execute(IEnumerable<Ast.Node> nodes)
+        public IEnumerable<object> Execute(IEnumerable<Ast.Node> nodes)
         {
             foreach (var node in nodes)
             {
                 switch (node)
                 {
                     case Ast.Statement statement:
-                        ExecuteStatement(statement);
+                        foreach (var result in ExecuteStatement(statement))
+                        {
+                            yield return result;
+                        }
                         break;
                     default:
                         throw new NotSupportedException($"Unsupported node type: {node.GetType().Name}");
@@ -41,20 +44,23 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Executes a program (legacy method for compatibility)
         /// </summary>
-        public void Execute(Ast.Program program)
+        public IEnumerable<object> Execute(Ast.Program program)
         {
-            Execute(program.Statements);
+            return Execute(program.Statements);
         }
 
         /// <summary>
-        /// Executes a single statement
+        /// Executes a single statement and yields output values
         /// </summary>
-        private void ExecuteStatement(Ast.Statement node)
+        private IEnumerable<object> ExecuteStatement(Ast.Statement node)
         {
             switch (node)
             {
+                case Ast.Output output:
+                    yield return EvaluateExpression(output.Expression);
+                    break;
                 case Ast.Assign assign:
-                     ExecuteAssignment(assign);
+                    ExecuteAssignment(assign);
                     break;
                 default:
                     throw new NotSupportedException($"Unsupported statement type: {node.GetType().Name}");
@@ -82,7 +88,7 @@ namespace BitPatch.DialogLang
                 _ => throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}")
             };
         }
-        
+
         private object EvaluateVariable(Ast.Variable variable)
         {
             if (_variables.TryGetValue(variable.Name, out var value))

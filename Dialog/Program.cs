@@ -24,9 +24,11 @@ try
     using var fileStream = File.OpenRead(scriptPath);
     using var reader = new StreamReader(fileStream);
 
-    dialog.Execute(reader);
+    foreach (var output in dialog.Execute(reader))
+    {
+        Console.WriteLine(output);
+    }
 
-    Console.WriteLine("Script executed successfully.");
     Console.WriteLine("\nVariables:");
     foreach (var variable in dialog.Variables)
     {

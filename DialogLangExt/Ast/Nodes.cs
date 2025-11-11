@@ -55,4 +55,9 @@ namespace BitPatch.DialogLang.Ast
     /// Node representing an assignment statement
     /// </summary>
     internal record Assign(Identifier Identifier, Expression Expression, TokenPosition Position) : Statement(Position);
+
+    /// <summary>
+    /// Node representing an output statement (<< expression)
+    /// </summary>
+    internal record Output(Expression Expression, TokenPosition Position) : Statement(Position);
 }

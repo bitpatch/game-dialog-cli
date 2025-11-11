@@ -66,12 +66,32 @@ namespace BitPatch.DialogLang
                 >= 'A' and <= 'Z' => ReadIdentifier(),
                 '_' => ReadIdentifier(),
 
-                // Single-character operators
+                // Operators
                 '=' => ReadSingleCharToken(TokenType.Assign, "="),
+                '<' => ReadFromLessThanSign(),
 
                 // Unknown character
                 _ => throw new InvalidSyntaxException("Unexpected symbol", _line, _column),
             };
+        }
+
+        /// <summary>
+        /// Reads '<<' output operator or throws exception
+        /// </summary>
+        private Token ReadFromLessThanSign()
+        {
+            var startLine = _line;
+            var startColumn = _column;
+            
+            MoveNextChar(); // consume first '<'
+            
+            if (_current == '<')
+            {
+                MoveNextChar(); // consume second '<'
+                return new Token(TokenType.Output, "<<", startLine, startColumn);
+            }
+            
+            throw new InvalidSyntaxException(startLine, startColumn);
         }
 
         /// <summary>

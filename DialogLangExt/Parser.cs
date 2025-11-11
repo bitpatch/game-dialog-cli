@@ -54,6 +54,7 @@ namespace BitPatch.DialogLang
             return _current.Type switch
             {
                 TokenType.Identifier => ParseStatementFromIdentifier(),
+                TokenType.Output => ParseOutput(),
                 _ => throw new InvalidSyntaxException(_current.Position)
             };
         }
@@ -87,6 +88,23 @@ namespace BitPatch.DialogLang
 
             var expression = ParseExpression();
             return new Ast.Assign(identifier, expression, identifier.Position);
+        }
+
+        /// <summary>
+        /// Parses an output statement: << expression
+        /// </summary>
+        private Ast.Output ParseOutput()
+        {
+            var position = _current.Position;
+            
+            if (_current.Type != TokenType.Output)
+            {
+                throw new InvalidOperationException($"Expected output token, but current token type is {_current.Type}");
+            }
+            MoveNext(); // consume '<<'
+
+            var expression = ParseExpression();
+            return new Ast.Output(expression, position);
         }
 
         private Ast.Identifier ParseIdentifier()

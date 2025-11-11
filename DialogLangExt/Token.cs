@@ -12,6 +12,7 @@ namespace BitPatch.DialogLang
         
         // Operators
         Assign,         // =
+        Output,         // <<
         
         // Special
         Newline,        // End of line (statement terminator)
