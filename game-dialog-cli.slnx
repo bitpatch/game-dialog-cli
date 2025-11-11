@@ -2,4 +2,5 @@
   <Project Path="Dialog/Dialog.csproj" />
   <Project Path="DialogLang/DialogLang.csproj" />
   <Project Path="DialogLang.Tests/DialogLang.Tests.csproj" />
+  <Project Path="DialogLangExt/DialogLangExt.csproj" />
 </Solution>
