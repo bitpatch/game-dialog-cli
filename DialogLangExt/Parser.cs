@@ -26,7 +26,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses tokens and yields statements one by one (streaming)
         /// </summary>
-        public IEnumerable<AstNode> Parse()
+        public IEnumerable<Ast.Node> Parse()
         {
             while (!IsAtEnd())
             {
@@ -37,7 +37,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses a single statement
         /// </summary>
-        private AstNode ParseStatement()
+        private Ast.Node ParseStatement()
         {
             // Check if this is an assignment statement
             if (_current.Type == TokenType.Identifier && _next.Type == TokenType.Assign)
@@ -51,7 +51,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses an assignment statement: identifier = expression
         /// </summary>
-        private AssignNode ParseAssignment()
+        private Ast.Assign ParseAssignment()
         {
             var variableName = _current.Value;
             MoveNext(); // consume identifier
@@ -64,13 +64,13 @@ namespace BitPatch.DialogLang
 
             var value = ParseExpression();
 
-            return new AssignNode(variableName, value);
+            return new Ast.Assign(variableName, value);
         }
 
         /// <summary>
         /// Parses an expression (for now, just literals)
         /// </summary>
-        private AstNode ParseExpression()
+        private Ast.Node ParseExpression()
         {
             return ParsePrimary();
         }
@@ -78,20 +78,20 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses primary expressions (numbers, variables)
         /// </summary>
-        private AstNode ParsePrimary()
+        private Ast.Node ParsePrimary()
         {
             var token = _current;
 
             if (token.Type == TokenType.Integer)
             {
                 MoveNext();
-                return new NumberNode(int.Parse(token.Value));
+                return new Ast.Number(int.Parse(token.Value));
             }
 
             if (token.Type == TokenType.Identifier)
             {
                 MoveNext();
-                return new VariableNode(token.Value);
+                return new Ast.Variable(token.Value);
             }
 
             throw new Exception($"Unexpected token in expression: {token}");

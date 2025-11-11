@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 
-namespace BitPatch.DialogLang
+namespace BitPatch.DialogLang.Ast
 {
     /// <summary>
     /// Base class for all AST nodes
     /// </summary>
-    internal abstract record AstNode;
+    internal abstract record Node;
 
     /// <summary>
     /// Root node representing the entire program
     /// </summary>
-    internal record ProgramNode(List<AstNode> Statements) : AstNode
+    internal record Program(List<Node> Statements) : Node
     {
-        public ProgramNode() : this(new List<AstNode>())
+        public Program() : this(new List<Node>())
         {
         }
     }
@@ -20,15 +20,15 @@ namespace BitPatch.DialogLang
     /// <summary>
     /// Node representing an integer number literal
     /// </summary>
-    internal record NumberNode(int Value) : AstNode;
+    internal record Number(int Value) : Node;
 
     /// <summary>
     /// Node representing a variable reference
     /// </summary>
-    internal record VariableNode(string Name) : AstNode;
+    internal record Variable(string Name) : Node;
 
     /// <summary>
     /// Node representing an assignment statement
     /// </summary>
-    internal record AssignNode(string VariableName, AstNode Value) : AstNode;
+    internal record Assign(string VariableName, Node Value) : Node;
 }

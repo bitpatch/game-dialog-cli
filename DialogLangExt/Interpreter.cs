@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BitPatch.DialogLang.Ast;
 
 namespace BitPatch.DialogLang
 {
@@ -23,7 +24,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Executes statements one by one as they arrive (streaming)
         /// </summary>
-        public void Execute(IEnumerable<AstNode> statements)
+        public void Execute(IEnumerable<Node> statements)
         {
             foreach (var statement in statements)
             {
@@ -34,7 +35,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Executes a program (legacy method for compatibility)
         /// </summary>
-        public void Execute(ProgramNode program)
+        public void Execute(Program program)
         {
             Execute(program.Statements);
         }
@@ -42,9 +43,9 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Executes a single statement
         /// </summary>
-        private void ExecuteStatement(AstNode node)
+        private void ExecuteStatement(Node node)
         {
-            if (node is AssignNode assign)
+            if (node is Assign assign)
             {
                 ExecuteAssignment(assign);
             }
@@ -57,7 +58,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Executes an assignment statement
         /// </summary>
-        private void ExecuteAssignment(AssignNode node)
+        private void ExecuteAssignment(Assign node)
         {
             var value = EvaluateExpression(node.Value);
             _variables[node.VariableName] = value;
@@ -66,14 +67,14 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Evaluates an expression and returns its value
         /// </summary>
-        private object EvaluateExpression(AstNode node)
+        private object EvaluateExpression(Node node)
         {
-            if (node is NumberNode number)
+            if (node is Number number)
             {
                 return number.Value;
             }
 
-            if (node is VariableNode variable)
+            if (node is Variable variable)
             {
                 if (_variables.TryGetValue(variable.Name, out var value))
                 {
