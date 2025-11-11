@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace BitPatch.DialogLang
 {
@@ -9,29 +8,18 @@ namespace BitPatch.DialogLang
     /// </summary>
     internal class Parser
     {
-        private readonly IEnumerator<Token> _tokenEnumerator;
-        private Token _currentToken;
-        private Token? _nextToken;
+        private readonly IEnumerator<Token> _tokens;
+        private Token _current;
+        private Token? _next;
 
         public Parser(IEnumerable<Token> tokens)
         {
-            _tokenEnumerator = tokens.GetEnumerator();
+            _tokens = tokens.GetEnumerator();
+            _current = new Token(TokenType.EndOfFile, string.Empty, 0);
             
-            // Load first token
-            if (!_tokenEnumerator.MoveNext())
-            {
-                _currentToken = new Token(TokenType.EndOfFile, string.Empty, 0);
-            }
-            else
-            {
-                _currentToken = _tokenEnumerator.Current;
-            }
-
-            // Peek next token
-            if (_tokenEnumerator.MoveNext())
-            {
-                _nextToken = _tokenEnumerator.Current;
-            }
+            // Initialize first two tokens
+            Advance();
+            Advance();
         }
 
         /// <summary>
@@ -51,12 +39,12 @@ namespace BitPatch.DialogLang
         private AstNode ParseStatement()
         {
             // Check if this is an assignment statement
-            if (_currentToken.Type == TokenType.Identifier && _nextToken?.Type == TokenType.Assign)
+            if (_current.Type == TokenType.Identifier && _next?.Type == TokenType.Assign)
             {
                 return ParseAssignment();
             }
 
-            throw new Exception($"Unexpected token: {_currentToken}");
+            throw new Exception($"Unexpected token: {_current}");
         }
 
         /// <summary>
@@ -64,12 +52,12 @@ namespace BitPatch.DialogLang
         /// </summary>
         private AssignNode ParseAssignment()
         {
-            var variableName = _currentToken.Value;
+            var variableName = _current.Value;
             Advance(); // consume identifier
 
-            if (_currentToken.Type != TokenType.Assign)
+            if (_current.Type != TokenType.Assign)
             {
-                throw new Exception($"Expected '=' but got {_currentToken}");
+                throw new Exception($"Expected '=' but got {_current}");
             }
             Advance(); // consume '='
 
@@ -91,7 +79,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         private AstNode ParsePrimary()
         {
-            var token = _currentToken;
+            var token = _current;
 
             if (token.Type == TokenType.Integer)
             {
@@ -113,7 +101,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         private bool IsAtEnd()
         {
-            return _currentToken.Type == TokenType.EndOfFile;
+            return _current.Type == TokenType.EndOfFile;
         }
 
         /// <summary>
@@ -121,23 +109,19 @@ namespace BitPatch.DialogLang
         /// </summary>
         private void Advance()
         {
-            if (_nextToken != null)
+            _current = _next ?? _current;
+            
+            if (_tokens.MoveNext())
             {
-                _currentToken = _nextToken;
-                
-                // Load next token
-                if (_tokenEnumerator.MoveNext())
-                {
-                    _nextToken = _tokenEnumerator.Current;
-                }
-                else
-                {
-                    _nextToken = null;
-                }
+                _next = _tokens.Current;
             }
-            else if (!IsAtEnd())
+            else if (_current.Type != TokenType.EndOfFile)
             {
-                _currentToken = new Token(TokenType.EndOfFile, string.Empty, _currentToken.Position);
+                _next = new Token(TokenType.EndOfFile, string.Empty, _current.Position);
+            }
+            else
+            {
+                _next = null;
             }
         }
     }
