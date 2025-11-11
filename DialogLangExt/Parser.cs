@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 
 namespace BitPatch.DialogLang
 {
@@ -30,14 +31,14 @@ namespace BitPatch.DialogLang
             // Skip leading newlines
             SkipNewlines();
 
-            while (!IsAtEnd())
+            while (!_current.IsEndOfFile())
             {
                 yield return ParseStatement();
 
                 // Expect newline or EOF after statement
-                if (!IsAtEnd() && _current.Type != TokenType.Newline)
+                if (!_current.IsEndOfStatement())
                 {
-                    throw new ScriptException($"Expected newline or end of file after statement, but got {_current.Type}", _current.Line, _current.Column);
+                    throw new InvalidSyntaxException(_current.Line, _current.Column);
                 }
 
                 // Skip newlines after statement
@@ -50,13 +51,25 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Ast.Node ParseStatement()
         {
-            // Check if this is an assignment statement
-            if (_current.Type == TokenType.Identifier && _next.Type == TokenType.Assign)
+            return _current.Type switch
             {
-                return ParseAssignment();
+                TokenType.Identifier => ParseStatementFromIdentifier(),
+                _ => throw new InvalidSyntaxException(_current.Line, _current.Column)
+            };
+        }
+
+        private Ast.Node ParseStatementFromIdentifier()
+        {
+            if (_current.Type != TokenType.Identifier)
+            {
+                throw new InvalidOperationException($"Expected identifier token, but current token type is {_current.Type}");
             }
 
-            throw new ScriptException($"Unexpected token: {_current.Type}", _current.Line, _current.Column);
+            return _next.Type switch
+            {
+                TokenType.Assign => ParseAssignment(),
+                _ => throw new InvalidSyntaxException(_current.Line, _current.Column)
+            };
         }
 
         /// <summary>
@@ -118,14 +131,6 @@ namespace BitPatch.DialogLang
             }
 
             throw new ScriptException($"Unexpected token in expression: {token.Type}", token.Line, token.Column);
-        }
-
-        /// <summary>
-        /// Checks if we've reached the end of tokens
-        /// </summary>
-        private bool IsAtEnd()
-        {
-            return _current.Type == TokenType.EndOfFile;
         }
 
         /// <summary>

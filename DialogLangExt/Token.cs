@@ -36,6 +36,16 @@ namespace BitPatch.DialogLang
             Column = column;
         }
 
+        public bool IsEndOfFile()
+        {
+            return Type == TokenType.EndOfFile;
+        }
+
+        public bool IsEndOfStatement()
+        {
+            return Type == TokenType.Newline || Type == TokenType.EndOfFile;
+        }
+
         public override string ToString()
         {
             return $"Token({Type}, '{Value}', Line: {Line}, Col: {Column})";
