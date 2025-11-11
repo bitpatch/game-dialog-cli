@@ -13,13 +13,15 @@ namespace BitPatch.DialogLang
         private readonly TextReader _reader;
         private readonly StringBuilder _buffer;
         private int _current;
-        private int _position;
+        private int _line;
+        private int _column;
 
         public Lexer(TextReader reader)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
             _buffer = new StringBuilder();
-            _position = 0;
+            _line = 1;
+            _column = 1;
             _current = _reader.Read();
         }
 
@@ -33,7 +35,7 @@ namespace BitPatch.DialogLang
                 yield return ReadNextToken();
             }
 
-            yield return new Token(TokenType.EndOfFile, string.Empty, _position);
+            yield return new Token(TokenType.EndOfFile, string.Empty, _line, _column);
         }
 
         /// <summary>
@@ -43,7 +45,7 @@ namespace BitPatch.DialogLang
         {
             if (_current == -1)
             {
-                return new Token(TokenType.EndOfFile, string.Empty, _position);
+                return new Token(TokenType.EndOfFile, string.Empty, _line, _column);
             }
 
             // Skip whitespace except newlines
@@ -53,42 +55,43 @@ namespace BitPatch.DialogLang
             }
 
             var currentChar = (char)_current;
-            var startPosition = _position;
+            var startLine = _line;
+            var startColumn = _column;
 
             return currentChar switch
             {
                 // Newline (statement terminator) - skip consecutive newlines
-                '\n' => ReadNewline(startPosition),
+                '\n' => ReadNewline(startLine, startColumn),
 
                 // Integer number
-                >= '0' and <= '9' => ReadNumber(startPosition),
+                >= '0' and <= '9' => ReadNumber(startLine, startColumn),
 
                 // Identifier (variable name) 
-                >= 'a' and <= 'z' => ReadIdentifier(startPosition),
-                >= 'A' and <= 'Z' => ReadIdentifier(startPosition),
-                '_' => ReadIdentifier(startPosition),
+                >= 'a' and <= 'z' => ReadIdentifier(startLine, startColumn),
+                >= 'A' and <= 'Z' => ReadIdentifier(startLine, startColumn),
+                '_' => ReadIdentifier(startLine, startColumn),
 
                 // Single-character operators
-                '=' => ReadSingleCharToken(TokenType.Assign, "=", startPosition),
+                '=' => ReadSingleCharToken(TokenType.Assign, "=", startLine, startColumn),
 
                 // Unknown character
-                _ => throw new ScriptException($"Unknown character: '{currentChar}' at position {startPosition}")
+                _ => throw new ScriptException($"Unknown character: '{currentChar}'", startLine, startColumn)
             };
         }
 
         /// <summary>
         /// Creates a single-character token and advances position
         /// </summary>
-        private Token ReadSingleCharToken(TokenType type, string value, int position)
+        private Token ReadSingleCharToken(TokenType type, string value, int line, int column)
         {
             MoveNextChar();
-            return new Token(type, value, position);
+            return new Token(type, value, line, column);
         }
 
         /// <summary>
         /// Reads an integer number from the source
         /// </summary>
-        private Token ReadNumber(int startPosition)
+        private Token ReadNumber(int startLine, int startColumn)
         {
             _buffer.Clear();
 
@@ -98,13 +101,13 @@ namespace BitPatch.DialogLang
                 MoveNextChar();
             }
 
-            return new Token(TokenType.Integer, _buffer.ToString(), startPosition);
+            return new Token(TokenType.Integer, _buffer.ToString(), startLine, startColumn);
         }
 
         /// <summary>
         /// Reads an identifier (variable name) from the source
         /// </summary>
-        private Token ReadIdentifier(int startPosition)
+        private Token ReadIdentifier(int startLine, int startColumn)
         {
             _buffer.Clear();
 
@@ -114,13 +117,13 @@ namespace BitPatch.DialogLang
                 MoveNextChar();
             }
 
-            return new Token(TokenType.Identifier, _buffer.ToString(), startPosition);
+            return new Token(TokenType.Identifier, _buffer.ToString(), startLine, startColumn);
         }
 
         /// <summary>
         /// Reads a newline token, skipping consecutive newlines and whitespace between them
         /// </summary>
-        private Token ReadNewline(int startPosition)
+        private Token ReadNewline(int startLine, int startColumn)
         {
             // Skip all consecutive newlines and whitespace between them
             while (_current != -1)
@@ -141,7 +144,7 @@ namespace BitPatch.DialogLang
                 }
             }
 
-            return new Token(TokenType.Newline, "\n", startPosition);
+            return new Token(TokenType.Newline, "\n", startLine, startColumn);
         }
 
         /// <summary>
@@ -149,8 +152,17 @@ namespace BitPatch.DialogLang
         /// </summary>
         private void MoveNextChar()
         {
+            if ((char)_current == '\n')
+            {
+                _line++;
+                _column = 1;
+            }
+            else
+            {
+                _column++;
+            }
+            
             _current = _reader.Read();
-            _position++;
         }
     }
 }

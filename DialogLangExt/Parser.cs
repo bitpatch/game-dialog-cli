@@ -14,8 +14,8 @@ namespace BitPatch.DialogLang
         public Parser(IEnumerable<Token> tokens)
         {
             _tokens = tokens.GetEnumerator();
-            _current = new Token(TokenType.EndOfFile, string.Empty, 0);
-            _next = new Token(TokenType.EndOfFile, string.Empty, 0);
+            _current = new Token(TokenType.EndOfFile, string.Empty, 0, 0);
+            _next = new Token(TokenType.EndOfFile, string.Empty, 0, 0);
 
             // Initialize first two tokens
             MoveNext();
@@ -37,7 +37,7 @@ namespace BitPatch.DialogLang
                 // Expect newline or EOF after statement
                 if (!IsAtEnd() && _current.Type != TokenType.Newline)
                 {
-                    throw new ScriptException($"Expected newline or end of file after statement, but got {_current}");
+                    throw new ScriptException($"Expected newline or end of file after statement, but got {_current.Type}", _current.Line, _current.Column);
                 }
 
                 // Skip newlines after statement
@@ -56,7 +56,7 @@ namespace BitPatch.DialogLang
                 return ParseAssignment();
             }
 
-            throw new ScriptException($"Unexpected token: {_current}");
+            throw new ScriptException($"Unexpected token: {_current.Type}", _current.Line, _current.Column);
         }
 
         /// <summary>
@@ -64,16 +64,19 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Ast.Assign ParseAssignment()
         {
+            var line = _current.Line;
+            var column = _current.Column;
+
             var identifier = ParseIdentifier();
 
             if (_current.Type != TokenType.Assign)
             {
-                throw new ScriptException($"Expected '=' but got {_current}");
+                throw new ScriptException($"Expected '=' but got {_current.Type}", _current.Line, _current.Column);
             }
             MoveNext(); // consume '='
 
             var expression = ParseExpression();
-            return new Ast.Assign(identifier, expression);
+            return new Ast.Assign(identifier, expression, line, column);
         }
 
         private Ast.Identifier ParseIdentifier()
@@ -82,11 +85,11 @@ namespace BitPatch.DialogLang
 
             if (token.Type != TokenType.Identifier)
             {
-                throw new ScriptException($"Expected identifier but got {token}");
+                throw new ScriptException($"Expected identifier but got {token.Type}", token.Line, token.Column);
             }
 
             MoveNext(); // consume identifier
-            return new Ast.Identifier(token.Value, token.Position);
+            return new Ast.Identifier(token.Value, token.Line, token.Column);
         }
 
         /// <summary>
@@ -99,16 +102,16 @@ namespace BitPatch.DialogLang
             if (token.Type == TokenType.Integer)
             {
                 MoveNext();
-                return new Ast.Number(int.Parse(token.Value));
+                return new Ast.Number(int.Parse(token.Value), token.Line, token.Column);
             }
 
             if (token.Type == TokenType.Identifier)
             {
                 MoveNext();
-                return new Ast.Variable(token.Value);
+                return new Ast.Variable(token.Value, token.Line, token.Column);
             }
 
-            throw new ScriptException($"Unexpected token in expression: {token}");
+            throw new ScriptException($"Unexpected token in expression: {token.Type}", token.Line, token.Column);
         }
 
         /// <summary>
@@ -132,7 +135,7 @@ namespace BitPatch.DialogLang
             }
             else
             {
-                _next = new Token(TokenType.EndOfFile, string.Empty, _current.Position);
+                _next = new Token(TokenType.EndOfFile, string.Empty, _current.Line, _current.Column);
             }
         }
 

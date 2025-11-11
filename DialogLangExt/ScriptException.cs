@@ -7,8 +7,13 @@ namespace BitPatch.DialogLang
     /// </summary>
     public class ScriptException : Exception
     {
-        public ScriptException(string message) : base(message)
+        public int Line { get; }
+        public int Column { get; }
+
+        public ScriptException(string message, int line, int column) : base(message)
         {
+            Line = line;
+            Column = column;
         }
     }
 }
