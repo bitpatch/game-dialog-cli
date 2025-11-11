@@ -11,14 +11,16 @@ namespace BitPatch.DialogLang
     internal class Lexer
     {
         private readonly TextReader _reader;
-        private int _currentChar;
+        private readonly StringBuilder _buffer;
+        private int _current;
         private int _position;
 
         public Lexer(TextReader reader)
         {
             _reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            _buffer = new StringBuilder();
             _position = 0;
-            _currentChar = _reader.Read();
+            _current = _reader.Read();
         }
 
         /// <summary>
@@ -26,9 +28,10 @@ namespace BitPatch.DialogLang
         /// </summary>
         public IEnumerable<Token> Tokenize()
         {
-            while (_currentChar != -1)
+            while (_current != -1)
             {
                 var token = GetNextToken();
+
                 if (token.Type != TokenType.Unknown)
                 {
                     yield return token;
@@ -43,42 +46,45 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Token GetNextToken()
         {
-            // Skip whitespace
-            while (_currentChar != -1 && char.IsWhiteSpace((char)_currentChar))
-            {
-                Advance();
-            }
-
-            if (_currentChar == -1)
+            if (_current == -1)
             {
                 return new Token(TokenType.EndOfFile, string.Empty, _position);
             }
 
-            var currentChar = (char)_currentChar;
+            // Skip whitespace
+            while (char.IsWhiteSpace((char)_current))
+            {
+                MoveNextChar();
+            }
+
+            var currentChar = (char)_current;
             var startPosition = _position;
 
-            // Integer number
-            if (char.IsDigit(currentChar))
+            return currentChar switch
             {
-                return ReadNumber(startPosition);
-            }
+                // Integer number
+                >= '0' and <= '9' => ReadNumber(startPosition),
 
-            // Identifier (variable name)
-            if (char.IsLetter(currentChar) || currentChar == '_')
-            {
-                return ReadIdentifier(startPosition);
-            }
+                // Identifier (variable name) 
+                >= 'a' and <= 'z' => ReadIdentifier(startPosition),
+                >= 'A' and <= 'Z' => ReadIdentifier(startPosition),
+                '_' => ReadIdentifier(startPosition),
 
-            // Assignment operator
-            if (currentChar == '=')
-            {
-                Advance();
-                return new Token(TokenType.Assign, "=", startPosition);
-            }
+                // Single-character operators
+                '=' => CreateSingleCharToken(TokenType.Assign, "=", startPosition),
 
-            // Unknown character - skip it
-            Advance();
-            return new Token(TokenType.Unknown, currentChar.ToString(), startPosition);
+                // Unknown character
+                _ => CreateSingleCharToken(TokenType.Unknown, currentChar.ToString(), startPosition)
+            };
+        }
+
+        /// <summary>
+        /// Creates a single-character token and advances position
+        /// </summary>
+        private Token CreateSingleCharToken(TokenType type, string value, int position)
+        {
+            MoveNextChar();
+            return new Token(type, value, position);
         }
 
         /// <summary>
@@ -86,15 +92,15 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Token ReadNumber(int startPosition)
         {
-            var sb = new StringBuilder();
+            _buffer.Clear();
 
-            while (_currentChar != -1 && char.IsDigit((char)_currentChar))
+            while (_current != -1 && char.IsDigit((char)_current))
             {
-                sb.Append((char)_currentChar);
-                Advance();
+                _buffer.Append((char)_current);
+                MoveNextChar();
             }
 
-            return new Token(TokenType.Integer, sb.ToString(), startPosition);
+            return new Token(TokenType.Integer, _buffer.ToString(), startPosition);
         }
 
         /// <summary>
@@ -102,24 +108,23 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Token ReadIdentifier(int startPosition)
         {
-            var sb = new StringBuilder();
+            _buffer.Clear();
 
-            while (_currentChar != -1 && 
-                   (char.IsLetterOrDigit((char)_currentChar) || (char)_currentChar == '_'))
+            while (_current != -1 && (char.IsLetterOrDigit((char)_current) || (char)_current == '_'))
             {
-                sb.Append((char)_currentChar);
-                Advance();
+                _buffer.Append((char)_current);
+                MoveNextChar();
             }
 
-            return new Token(TokenType.Identifier, sb.ToString(), startPosition);
+            return new Token(TokenType.Identifier, _buffer.ToString(), startPosition);
         }
 
         /// <summary>
         /// Advances to the next character
         /// </summary>
-        private void Advance()
+        private void MoveNextChar()
         {
-            _currentChar = _reader.Read();
+            _current = _reader.Read();
             _position++;
         }
     }
