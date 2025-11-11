@@ -1,4 +1,6 @@
-﻿using BitPatch.DialogLang;
+﻿using System.Linq;
+using System.Text;
+using BitPatch.DialogLang;
 
 if (args.Length == 0)
 {
@@ -35,12 +37,57 @@ try
 }
 catch (ScriptException ex)
 {
-    Console.WriteLine($"Script Error: {ex.Message}");
+    Console.WriteLine($"Error {ex.Message} (line {ex.Line}, column {ex.Column})");
+    PrintScriptError(scriptPath, ex.Line, ex.Column);
     return 1;
 }
 catch (Exception ex)
 {
     Console.WriteLine($"Error: {ex.Message}");
     return 1;
+}
+
+static void PrintScriptError(string scriptPath, int line, int column)
+{
+    try
+    {
+        if (line <= 0)
+        {
+            Console.WriteLine("    <unknown location>");
+            return;
+        }
+
+        string? errorLine = File.ReadLines(scriptPath).Skip(line - 1).FirstOrDefault();
+        if (errorLine == null)
+        {
+            Console.WriteLine("    <line unavailable>");
+            return;
+        }
+
+        string prefix = $"    Line {line}: ";
+        Console.WriteLine(prefix + errorLine);
+
+        int pointerColumn = Math.Max(column, 1);
+        var pointerBuilder = new StringBuilder();
+        pointerBuilder.Append(' ', prefix.Length);
+        for (int i = 1; i < pointerColumn; i++)
+        {
+            if (i <= errorLine.Length && errorLine[i - 1] == '\t')
+            {
+                pointerBuilder.Append('\t');
+            }
+            else
+            {
+                pointerBuilder.Append(' ');
+            }
+        }
+
+        pointerBuilder.Append('^');
+        Console.WriteLine(pointerBuilder.ToString());
+    }
+    catch (Exception)
+    {
+        Console.WriteLine("    <unable to display error location>");
+    }
 }
 
