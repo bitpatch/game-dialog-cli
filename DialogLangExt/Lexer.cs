@@ -62,8 +62,8 @@ namespace BitPatch.DialogLang
 
             return currentChar switch
             {
-                // Newline (statement terminator)
-                '\n' => ReadSingleCharToken(TokenType.Newline, "new line", startPosition),
+                // Newline (statement terminator) - skip consecutive newlines
+                '\n' => ReadNewline(startPosition),
 
                 // Integer number
                 >= '0' and <= '9' => ReadNumber(startPosition),
@@ -77,7 +77,7 @@ namespace BitPatch.DialogLang
                 '=' => ReadSingleCharToken(TokenType.Assign, "=", startPosition),
 
                 // Unknown character
-                _ => new Token(TokenType.Unknown, currentChar.ToString(), startPosition),
+                _ => ReadSingleCharToken(TokenType.Unknown, currentChar.ToString(), startPosition),
             };
         }
 
@@ -120,6 +120,33 @@ namespace BitPatch.DialogLang
             }
 
             return new Token(TokenType.Identifier, _buffer.ToString(), startPosition);
+        }
+
+        /// <summary>
+        /// Reads a newline token, skipping consecutive newlines and whitespace between them
+        /// </summary>
+        private Token ReadNewline(int startPosition)
+        {
+            // Skip all consecutive newlines and whitespace between them
+            while (_current != -1)
+            {
+                if ((char)_current == '\n')
+                {
+                    MoveNextChar();
+                }
+                else if (char.IsWhiteSpace((char)_current))
+                {
+                    // Skip whitespace between newlines
+                    MoveNextChar();
+                }
+                else
+                {
+                    // Stop at non-whitespace character
+                    break;
+                }
+            }
+
+            return new Token(TokenType.Newline, "\n", startPosition);
         }
 
         /// <summary>
