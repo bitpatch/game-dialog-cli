@@ -28,9 +28,21 @@ namespace BitPatch.DialogLang
         /// </summary>
         public IEnumerable<Ast.Node> Parse()
         {
+            // Skip leading newlines
+            SkipNewlines();
+
             while (!IsAtEnd())
             {
                 yield return ParseStatement();
+
+                // Expect newline or EOF after statement
+                if (!IsAtEnd() && _current.Type != TokenType.Newline)
+                {
+                    throw new ScriptException($"Expected newline or end of file after statement, but got {_current}");
+                }
+
+                // Skip newlines after statement
+                SkipNewlines();
             }
         }
 
@@ -122,6 +134,17 @@ namespace BitPatch.DialogLang
             else
             {
                 _next = new Token(TokenType.EndOfFile, string.Empty, _current.Position);
+            }
+        }
+
+        /// <summary>
+        /// Skips all consecutive newline tokens
+        /// </summary>
+        private void SkipNewlines()
+        {
+            while (_current.Type == TokenType.Newline)
+            {
+                MoveNext();
             }
         }
     }

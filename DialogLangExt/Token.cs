@@ -13,6 +13,7 @@ namespace BitPatch.DialogLang
         Assign,         // =
         
         // Special
+        Newline,        // End of line (statement terminator)
         EndOfFile,
         Unknown
     }
