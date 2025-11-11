@@ -10,16 +10,17 @@ namespace BitPatch.DialogLang
     {
         private readonly IEnumerator<Token> _tokens;
         private Token _current;
-        private Token? _next;
+        private Token _next;
 
         public Parser(IEnumerable<Token> tokens)
         {
             _tokens = tokens.GetEnumerator();
             _current = new Token(TokenType.EndOfFile, string.Empty, 0);
+            _next = new Token(TokenType.EndOfFile, string.Empty, 0);
             
             // Initialize first two tokens
-            Advance();
-            Advance();
+            MoveNext();
+            MoveNext();
         }
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace BitPatch.DialogLang
         private AstNode ParseStatement()
         {
             // Check if this is an assignment statement
-            if (_current.Type == TokenType.Identifier && _next?.Type == TokenType.Assign)
+            if (_current.Type == TokenType.Identifier && _next.Type == TokenType.Assign)
             {
                 return ParseAssignment();
             }
@@ -53,13 +54,13 @@ namespace BitPatch.DialogLang
         private AssignNode ParseAssignment()
         {
             var variableName = _current.Value;
-            Advance(); // consume identifier
+            MoveNext(); // consume identifier
 
             if (_current.Type != TokenType.Assign)
             {
                 throw new Exception($"Expected '=' but got {_current}");
             }
-            Advance(); // consume '='
+            MoveNext(); // consume '='
 
             var value = ParseExpression();
 
@@ -83,13 +84,13 @@ namespace BitPatch.DialogLang
 
             if (token.Type == TokenType.Integer)
             {
-                Advance();
+                MoveNext();
                 return new NumberNode(int.Parse(token.Value));
             }
 
             if (token.Type == TokenType.Identifier)
             {
-                Advance();
+                MoveNext();
                 return new VariableNode(token.Value);
             }
 
@@ -105,23 +106,19 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Advances to the next token
+        /// Moves to the next token
         /// </summary>
-        private void Advance()
+        private void MoveNext()
         {
-            _current = _next ?? _current;
+            _current = _next;
             
             if (_tokens.MoveNext())
             {
                 _next = _tokens.Current;
             }
-            else if (_current.Type != TokenType.EndOfFile)
-            {
-                _next = new Token(TokenType.EndOfFile, string.Empty, _current.Position);
-            }
             else
             {
-                _next = null;
+                _next = new Token(TokenType.EndOfFile, string.Empty, _current.Position);
             }
         }
     }
