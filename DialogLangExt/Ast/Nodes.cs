@@ -24,7 +24,7 @@ namespace BitPatch.DialogLang.Ast
     /// <summary>
     /// Root node representing the entire program
     /// </summary>
-    internal record Program(List<Node> Statements, TokenPosition Position) : Node(Position);
+    internal record Program(List<Statement> Statements, TokenPosition Position) : Node(Position);
 
     /// <summary>
     /// Base class for all value (literal) nodes
@@ -59,5 +59,5 @@ namespace BitPatch.DialogLang.Ast
     /// <summary>
     /// Node representing an output statement (<< expression)
     /// </summary>
-    internal record Output(Expression Expression, TokenPosition Position) : Statement(Position);
+    internal sealed record Output(Expression Expression, TokenPosition Position) : Statement(Position);
 }

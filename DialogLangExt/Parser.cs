@@ -26,7 +26,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses tokens and yields statements one by one (streaming)
         /// </summary>
-        public IEnumerable<Ast.Node> Parse()
+        public IEnumerable<Ast.Statement> Parse()
         {
             // Skip leading newlines
             SkipNewlines();
@@ -49,7 +49,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Parses a single statement
         /// </summary>
-        private Ast.Node ParseStatement()
+        private Ast.Statement ParseStatement()
         {
             return _current.Type switch
             {
@@ -59,7 +59,7 @@ namespace BitPatch.DialogLang
             };
         }
 
-        private Ast.Node ParseStatementFromIdentifier()
+        private Ast.Statement ParseStatementFromIdentifier()
         {
             if (_current.Type != TokenType.Identifier)
             {

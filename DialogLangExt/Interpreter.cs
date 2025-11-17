@@ -23,20 +23,20 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Executes statements one by one as they arrive (streaming), yielding output values
         /// </summary>
-        public IEnumerable<object> Execute(IEnumerable<Ast.Node> nodes)
+        public IEnumerable<object> Execute(IEnumerable<Ast.Statement> statements)
         {
-            foreach (var node in nodes)
+            foreach (var statement in statements)
             {
-                switch (node)
+                switch (statement)
                 {
-                    case Ast.Statement statement:
-                        foreach (var result in ExecuteStatement(statement))
-                        {
-                            yield return result;
-                        }
+                    case Ast.Output output:
+                        yield return EvaluateExpression(output.Expression);
+                        break;
+                    case Ast.Assign assign:
+                        ExecuteAssignment(assign);
                         break;
                     default:
-                        throw new NotSupportedException($"Unsupported node type: {node.GetType().Name}");
+                        throw new NotSupportedException($"Unsupported statement type: {statement.GetType().Name}");
                 }
             }
         }
@@ -47,24 +47,6 @@ namespace BitPatch.DialogLang
         public IEnumerable<object> Execute(Ast.Program program)
         {
             return Execute(program.Statements);
-        }
-
-        /// <summary>
-        /// Executes a single statement and yields output values
-        /// </summary>
-        private IEnumerable<object> ExecuteStatement(Ast.Statement node)
-        {
-            switch (node)
-            {
-                case Ast.Output output:
-                    yield return EvaluateExpression(output.Expression);
-                    break;
-                case Ast.Assign assign:
-                    ExecuteAssignment(assign);
-                    break;
-                default:
-                    throw new NotSupportedException($"Unsupported statement type: {node.GetType().Name}");
-            }
         }
 
         /// <summary>
