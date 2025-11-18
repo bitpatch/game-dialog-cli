@@ -80,11 +80,7 @@ namespace BitPatch.DialogLang
         {
             var identifier = ParseIdentifier();
 
-            if (_current.Type != TokenType.Assign)
-            {
-                throw new InvalidOperationException($"Expected assignment token, but current token type is {_current.Type}");
-            }
-            MoveNext(); // consume '='
+            Consume(TokenType.Assign); // consume '='
 
             var expression = ParseExpression();
             return new Ast.Assign(identifier, expression, identifier.Position);
@@ -97,11 +93,7 @@ namespace BitPatch.DialogLang
         {
             var position = _current.Position;
 
-            if (_current.Type != TokenType.Output)
-            {
-                throw new InvalidOperationException($"Expected output token, but current token type is {_current.Type}");
-            }
-            MoveNext(); // consume '<<'
+            Consume(TokenType.Output); // consume '<<'
 
             var expression = ParseExpression();
             return new Ast.Output(expression, position);
@@ -111,12 +103,7 @@ namespace BitPatch.DialogLang
         {
             var token = _current;
 
-            if (token.Type != TokenType.Identifier)
-            {
-                throw new InvalidOperationException($"Expected identifier token, but current token type is {_current.Type}");
-            }
-
-            MoveNext(); // consume identifier
+            Consume(TokenType.Identifier); // consume identifier
             return new Ast.Identifier(token.Value, token.Position);
         }
 
@@ -254,6 +241,21 @@ namespace BitPatch.DialogLang
             {
                 MoveNext();
             }
+        }
+
+        /// <summary>
+        /// Consumes a token of the expected type and moves to the next token
+        /// </summary>
+        /// <param name="expectedType">The expected token type</param>
+        /// <exception cref="InvalidOperationException">Thrown when current token doesn't match expected type</exception>
+        private void Consume(TokenType expectedType)
+        {
+            if (_current.Type != expectedType)
+            {
+                throw new InvalidOperationException($"Expected {expectedType} token, but current token type is {_current.Type}");
+            }
+
+            MoveNext();
         }
     }
 }
