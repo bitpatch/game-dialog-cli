@@ -43,4 +43,49 @@ public class BooleanTests
         // Assert
         Assert.Equal(new object[] { expected }, results);
     }
+
+    [Fact]
+    public void VariablesWithBooleans()
+    {
+        var results = ExecuteScript(@"x = true
+<< x
+y = false
+<< y");
+        
+        Assert.Equal(new object[] { true, false }, results);
+    }
+
+    [Fact]
+    public void ComplexExpressionWithVariables()
+    {
+        var results = ExecuteScript(@"a = true
+b = false
+c = true
+<< (a or b) and not (b xor c)");
+        
+        Assert.Equal(new object[] { false }, results);
+    }
+
+    [Fact]
+    public void MultipleOutputsWithOperators()
+    {
+        var results = ExecuteScript(@"<< true and false
+<< false or true
+<< not false");
+        
+        Assert.Equal(new object[] { false, true, true }, results);
+    }
+
+    [Fact]
+    public void VariableReassignment()
+    {
+        var results = ExecuteScript(@"x = true
+<< x
+x = false
+<< x
+x = not x
+<< x");
+        
+        Assert.Equal(new object[] { true, false, true }, results);
+    }
 }
