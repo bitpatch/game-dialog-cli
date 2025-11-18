@@ -56,7 +56,7 @@ y = false
     }
 
     [Fact]
-    public void ComplexExpressionWithVariables()
+    public void ComplexExpression()
     {
         var results = ExecuteScript(@"a = true
 b = false
@@ -67,7 +67,7 @@ c = true
     }
 
     [Fact]
-    public void MultipleOutputsWithOperators()
+    public void MultipleOutputs()
     {
         var results = ExecuteScript(@"<< true and false
 << false or true
@@ -87,5 +87,27 @@ x = not x
 << x");
         
         Assert.Equal(new object[] { true, false, true }, results);
+    }
+
+    [Theory]
+    [InlineData("<< and true")]
+    [InlineData("<< true and")]
+    [InlineData("<< (true and false")]
+    [InlineData("<< true and false)")]
+    public void InvalidSyntax(string script)
+    {
+        Assert.Throws<InvalidSyntaxException>(() => ExecuteScript(script));
+    }
+
+    [Theory]
+    [InlineData("<< true and 5")]
+    [InlineData("<< 42 and false")]
+    [InlineData("<< false or \"hello\"")]
+    [InlineData("<< true xor 10")]
+    [InlineData("<< not \"test\"")]
+    [InlineData("<< not 123")]
+    public void TypeMismatch(string script)
+    {
+        Assert.Throws<ScriptException>(() => ExecuteScript(script));
     }
 }
