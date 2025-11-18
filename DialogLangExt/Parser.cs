@@ -211,6 +211,31 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
+        /// Parses additive expression (+ and -)
+        /// </summary>
+        private Ast.Expression ParseAdditiveExpression()
+        {
+            var left = ParsePrimaryExpression();
+
+            while (_current.Type is TokenType.Plus or TokenType.Minus)
+            {
+                var position = _current.Position;
+                var opType = _current.Type;
+                MoveNext(); // consume operator
+                var right = ParsePrimaryExpression();
+                
+                left = opType switch
+                {
+                    TokenType.Plus => new Ast.AddOp(left, right, position),
+                    TokenType.Minus => new Ast.SubOp(left, right, position),
+                    _ => throw new InvalidOperationException($"Unexpected operator: {opType}")
+                };
+            }
+
+            return left;
+        }
+
+        /// <summary>
         /// Parses 'not' expression (unary operator)
         /// </summary>
         private Ast.Expression ParseNotExpression()
@@ -223,7 +248,7 @@ namespace BitPatch.DialogLang
                 return new Ast.NotOp(operand, position);
             }
 
-            return ParsePrimaryExpression();
+            return ParseAdditiveExpression();
         }
 
         /// <summary>

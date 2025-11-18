@@ -115,6 +115,18 @@ namespace BitPatch.DialogLang.Ast
     /// </summary>
     internal record NotEqualOp(Expression Left, Expression Right, TokenPosition Position) : Expression(Position);
 
+    // Arithmetic Operations
+
+    /// <summary>
+    /// Node representing addition operation (a + b)
+    /// </summary>
+    internal record AddOp(Expression Left, Expression Right, TokenPosition Position) : Expression(Position);
+
+    /// <summary>
+    /// Node representing subtraction operation (a - b)
+    /// </summary>
+    internal record SubOp(Expression Left, Expression Right, TokenPosition Position) : Expression(Position);
+
     // Unary Operations
 
     /// <summary>

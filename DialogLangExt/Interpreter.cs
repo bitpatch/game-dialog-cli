@@ -79,6 +79,8 @@ namespace BitPatch.DialogLang
                 Ast.LessOrEqualOp lessOrEqual => EvaluateLessOrEqualOp(lessOrEqual),
                 Ast.EqualOp equal => EvaluateEqualOp(equal),
                 Ast.NotEqualOp notEqual => EvaluateNotEqualOp(notEqual),
+                Ast.AddOp addOp => EvaluateAddOp(addOp),
+                Ast.SubOp subOp => EvaluateSubOp(subOp),
                 _ => throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}")
             };
         }
@@ -223,6 +225,66 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(op.Left);
             var right = EvaluateExpression(op.Right);
             return new Boolean(!AreEqual(left, right));
+        }
+
+        /// <summary>
+        /// Evaluates addition operation (+)
+        /// </summary>
+        private RuntimeValue EvaluateAddOp(Ast.AddOp op)
+        {
+            var left = EvaluateExpression(op.Left);
+            var right = EvaluateExpression(op.Right);
+
+            // String concatenation with type conversion
+            if (left is String || right is String)
+            {
+                return new String(ConvertToString(left) + ConvertToString(right));
+            }
+
+            // Numeric addition
+            return (left, right) switch
+            {
+                (Integer l, Integer r) => new Integer(l.Value + r.Value),
+                (Float l, Float r) => new Float(l.Value + r.Value),
+                (Integer l, Float r) => new Float(l.Value + r.Value),
+                (Float l, Integer r) => new Float(l.Value + r.Value),
+                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Position),
+                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Position)
+            };
+        }
+
+        /// <summary>
+        /// Evaluates subtraction operation (-)
+        /// </summary>
+        private RuntimeValue EvaluateSubOp(Ast.SubOp op)
+        {
+            var left = EvaluateExpression(op.Left);
+            var right = EvaluateExpression(op.Right);
+
+            return (left, right) switch
+            {
+                (Integer l, Integer r) => new Integer(l.Value - r.Value),
+                (Float l, Float r) => new Float(l.Value - r.Value),
+                (Integer l, Float r) => new Float(l.Value - r.Value),
+                (Float l, Integer r) => new Float(l.Value - r.Value),
+                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Position),
+                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Position)
+            };
+        }
+
+        /// <summary>
+        /// Converts a runtime value to string representation
+        /// </summary>
+        private string ConvertToString(RuntimeValue value)
+        {
+            return value switch
+            {
+                String s => s.Value,
+                Integer i => i.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                Float f => f.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                Boolean b => b.Value ? "true" : "false",
+                _ => throw new NotSupportedException($"Cannot convert {value.GetType().Name} to string")
+            };
         }
 
         /// <summary>

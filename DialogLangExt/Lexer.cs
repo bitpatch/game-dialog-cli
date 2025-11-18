@@ -71,6 +71,8 @@ namespace BitPatch.DialogLang
                 '<' => ReadFromLessThanSign(),
                 '>' => ReadFromGreaterThanSign(),
                 '!' => ReadFromExclamationMark(),
+                '+' => ReadSingleCharToken(TokenType.Plus, "+"),
+                '-' => ReadSingleCharToken(TokenType.Minus, "-"),
 
                 // Delimiters
                 '(' => ReadSingleCharToken(TokenType.LeftParen, "("),
@@ -276,7 +278,7 @@ namespace BitPatch.DialogLang
                 }
                 else if ((char)_current == '\n')
                 {
-                    throw new InvalidSyntaxException("End of line while scanning string literal", _line, _column);
+                    throw new InvalidSyntaxException("String is not closed with a quote", _line, _column);
                 }
                 else
                 {

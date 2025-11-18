@@ -20,6 +20,8 @@ namespace BitPatch.DialogLang
         Or,             // or
         Not,            // not
         Xor,            // xor
+        Plus,           // +
+        Minus,          // -
         
         // Comparison operators
         GreaterThan,    // >
