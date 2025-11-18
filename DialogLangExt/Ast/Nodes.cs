@@ -56,6 +56,32 @@ namespace BitPatch.DialogLang.Ast
     /// </summary>
     internal record Identifier(string Name, TokenPosition Position) : Node(Position);
 
+    // Binary Operations
+
+    /// <summary>
+    /// Node representing logical AND operation (a and b)
+    /// </summary>
+    internal record AndOp(Expression Left, Expression Right, TokenPosition Position) : Expression(Position);
+
+    /// <summary>
+    /// Node representing logical OR operation (a or b)
+    /// </summary>
+    internal record OrOp(Expression Left, Expression Right, TokenPosition Position) : Expression(Position);
+
+    /// <summary>
+    /// Node representing logical XOR operation (a xor b)
+    /// </summary>
+    internal record XorOp(Expression Left, Expression Right, TokenPosition Position) : Expression(Position);
+
+    // Unary Operations
+
+    /// <summary>
+    /// Node representing logical NOT operation (not a)
+    /// </summary>
+    internal record NotOp(Expression Operand, TokenPosition Position) : Expression(Position);
+
+    // Statements
+
     /// <summary>
     /// Node representing an assignment statement
     /// </summary>

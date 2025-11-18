@@ -70,6 +70,10 @@ namespace BitPatch.DialogLang
                 '=' => ReadSingleCharToken(TokenType.Assign, "="),
                 '<' => ReadFromLessThanSign(),
 
+                // Delimiters
+                '(' => ReadSingleCharToken(TokenType.LeftParen, "("),
+                ')' => ReadSingleCharToken(TokenType.RightParen, ")"),
+
                 // Unknown character
                 _ => throw new InvalidSyntaxException("Unexpected symbol", _line, _column),
             };
@@ -138,11 +142,15 @@ namespace BitPatch.DialogLang
 
             var value = _buffer.ToString();
 
-            // Check for boolean keywords
+            // Check for keywords
             return value switch
             {
-                "true" => new Token(TokenType.Boolean, "true", position),
-                "false" => new Token(TokenType.Boolean, "false", position),
+                "true" => new Token(TokenType.True, "true", position),
+                "false" => new Token(TokenType.False, "false", position),
+                "and" => new Token(TokenType.And, "and", position),
+                "or" => new Token(TokenType.Or, "or", position),
+                "not" => new Token(TokenType.Not, "not", position),
+                "xor" => new Token(TokenType.Xor, "xor", position),
                 _ => new Token(TokenType.Identifier, value, position)
             };
         }

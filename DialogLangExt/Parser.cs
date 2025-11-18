@@ -96,7 +96,7 @@ namespace BitPatch.DialogLang
         private Ast.Output ParseOutput()
         {
             var position = _current.Position;
-            
+
             if (_current.Type != TokenType.Output)
             {
                 throw new InvalidOperationException($"Expected output token, but current token type is {_current.Type}");
@@ -121,9 +121,88 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Parses an expression (for now, just literals)
+        /// Parses an expression with operator precedence
+        /// Precedence (low to high): or, xor, and, not, primary
         /// </summary>
         private Ast.Expression ParseExpression()
+        {
+            return ParseOrExpression();
+        }
+
+        /// <summary>
+        /// Parses 'or' expression (lowest precedence)
+        /// </summary>
+        private Ast.Expression ParseOrExpression()
+        {
+            var left = ParseXorExpression();
+
+            while (_current.Type == TokenType.Or)
+            {
+                var position = _current.Position;
+                MoveNext(); // consume 'or'
+                var right = ParseXorExpression();
+                left = new Ast.OrOp(left, right, position);
+            }
+
+            return left;
+        }
+
+        /// <summary>
+        /// Parses 'xor' expression
+        /// </summary>
+        private Ast.Expression ParseXorExpression()
+        {
+            var left = ParseAndExpression();
+
+            while (_current.Type == TokenType.Xor)
+            {
+                var position = _current.Position;
+                MoveNext(); // consume 'xor'
+                var right = ParseAndExpression();
+                left = new Ast.XorOp(left, right, position);
+            }
+
+            return left;
+        }
+
+        /// <summary>
+        /// Parses 'and' expression
+        /// </summary>
+        private Ast.Expression ParseAndExpression()
+        {
+            var left = ParseNotExpression();
+
+            while (_current.Type == TokenType.And)
+            {
+                var position = _current.Position;
+                MoveNext(); // consume 'and'
+                var right = ParseNotExpression();
+                left = new Ast.AndOp(left, right, position);
+            }
+
+            return left;
+        }
+
+        /// <summary>
+        /// Parses 'not' expression (unary operator)
+        /// </summary>
+        private Ast.Expression ParseNotExpression()
+        {
+            if (_current.Type == TokenType.Not)
+            {
+                var position = _current.Position;
+                MoveNext(); // consume 'not'
+                var operand = ParseNotExpression(); // right-associative
+                return new Ast.NotOp(operand, position);
+            }
+
+            return ParsePrimaryExpression();
+        }
+
+        /// <summary>
+        /// Parses primary expression (literals, variables, parenthesized expressions)
+        /// </summary>
+        private Ast.Expression ParsePrimaryExpression()
         {
             var token = _current;
             MoveNext();
@@ -132,10 +211,28 @@ namespace BitPatch.DialogLang
             {
                 TokenType.Integer => new Ast.Number(int.Parse(token.Value), token.Position),
                 TokenType.String => new Ast.String(token.Value, token.Position),
-                TokenType.Boolean => new Ast.Boolean(token.Value == "true", token.Position),
+                TokenType.True => new Ast.Boolean(true, token.Position),
+                TokenType.False => new Ast.Boolean(false, token.Position),
                 TokenType.Identifier => new Ast.Variable(token.Value, token.Position),
+                TokenType.LeftParen => ParseParenthesizedExpression(),
                 _ => throw new InvalidSyntaxException(token.Position)
             };
+        }
+
+        /// <summary>
+        /// Parses a parenthesized expression: (expression)
+        /// </summary>
+        private Ast.Expression ParseParenthesizedExpression()
+        {
+            var expression = ParseExpression();
+
+            if (_current.Type != TokenType.RightParen)
+            {
+                throw new InvalidSyntaxException(_current.Position);
+            }
+
+            MoveNext(); // consume ')'
+            return expression;
         }
 
         /// <summary>

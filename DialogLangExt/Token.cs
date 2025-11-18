@@ -8,12 +8,21 @@ namespace BitPatch.DialogLang
         // Literals
         Integer,        // 123, 456
         String,         // "Hello World"
-        Boolean,        // true, false
+        True,           // true
+        False,          // false
         Identifier,     // variable names
         
         // Operators
         Assign,         // =
         Output,         // <<
+        And,            // and
+        Or,             // or
+        Not,            // not
+        Xor,            // xor
+        
+        // Delimiters
+        LeftParen,      // (
+        RightParen,     // )
         
         // Special
         Newline,        // End of line (statement terminator)

@@ -68,8 +68,90 @@ namespace BitPatch.DialogLang
                 Ast.String str => str.Value,
                 Ast.Boolean boolean => boolean.Value,
                 Ast.Variable variable => EvaluateVariable(variable),
+                Ast.AndOp andOp => EvaluateAndOp(andOp),
+                Ast.OrOp orOp => EvaluateOrOp(orOp),
+                Ast.XorOp xorOp => EvaluateXorOp(xorOp),
+                Ast.NotOp notOp => EvaluateNotOp(notOp),
                 _ => throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}")
             };
+        }
+
+        /// <summary>
+        /// Evaluates logical AND operation
+        /// </summary>
+        private bool EvaluateAndOp(Ast.AndOp andOp)
+        {
+            var left = EvaluateExpression(andOp.Left);
+            var right = EvaluateExpression(andOp.Right);
+
+            if (left is not bool leftBool)
+            {
+                throw new ScriptException($"Left operand of 'and' must be boolean, got {left.GetType().Name}", andOp.Position);
+            }
+
+            if (right is not bool rightBool)
+            {
+                throw new ScriptException($"Right operand of 'and' must be boolean, got {right.GetType().Name}", andOp.Position);
+            }
+
+            return leftBool && rightBool;
+        }
+
+        /// <summary>
+        /// Evaluates logical OR operation
+        /// </summary>
+        private bool EvaluateOrOp(Ast.OrOp orOp)
+        {
+            var left = EvaluateExpression(orOp.Left);
+            var right = EvaluateExpression(orOp.Right);
+
+            if (left is not bool leftBool)
+            {
+                throw new ScriptException($"Left operand of 'or' must be boolean, got {left.GetType().Name}", orOp.Position);
+            }
+
+            if (right is not bool rightBool)
+            {
+                throw new ScriptException($"Right operand of 'or' must be boolean, got {right.GetType().Name}", orOp.Position);
+            }
+
+            return leftBool || rightBool;
+        }
+
+        /// <summary>
+        /// Evaluates logical XOR operation
+        /// </summary>
+        private bool EvaluateXorOp(Ast.XorOp xorOp)
+        {
+            var left = EvaluateExpression(xorOp.Left);
+            var right = EvaluateExpression(xorOp.Right);
+
+            if (left is not bool leftBool)
+            {
+                throw new ScriptException($"Left operand of 'xor' must be boolean, got {left.GetType().Name}", xorOp.Position);
+            }
+
+            if (right is not bool rightBool)
+            {
+                throw new ScriptException($"Right operand of 'xor' must be boolean, got {right.GetType().Name}", xorOp.Position);
+            }
+
+            return leftBool ^ rightBool;
+        }
+
+        /// <summary>
+        /// Evaluates logical NOT operation
+        /// </summary>
+        private bool EvaluateNotOp(Ast.NotOp notOp)
+        {
+            var operand = EvaluateExpression(notOp.Operand);
+
+            if (operand is not bool boolOperand)
+            {
+                throw new ScriptException($"Operand of 'not' must be boolean, got {operand.GetType().Name}", notOp.Position);
+            }
+
+            return !boolOperand;
         }
 
         private object EvaluateVariable(Ast.Variable variable)

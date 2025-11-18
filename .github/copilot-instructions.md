@@ -24,8 +24,8 @@ The interpreter follows a classic three-stage pipeline architecture with streami
    - Input: `TextReader` with source code
    - Output: `IEnumerable<Token>` (streaming)
    - Converts source text into tokens using `yield return`
-   - Token types: `Identifier`, `Number`, `String`, `Boolean`, `Assign` (=), `Output` (<<), `Newline`, `EndOfFile`
-   - Keywords: `true`, `false`
+   - Token types: `Identifier`, `Number`, `String`, `True`, `False`, `Assign` (=), `Output` (<<), `And`, `Or`, `Not`, `Xor`, `LeftParen` (, `RightParen` ), `Newline`, `EndOfFile`
+   - Keywords: `true`, `false`, `and`, `or`, `not`, `xor`
 
 2. **Parser** (`Parser.cs`) - Syntax Analysis
    - Input: `IEnumerable<Token>` from Lexer
@@ -33,6 +33,8 @@ The interpreter follows a classic three-stage pipeline architecture with streami
    - Builds AST nodes using `yield return`
    - Uses one-token lookahead (`_current` and `_next`)
    - Statement types: `Assign`, `Output`
+   - Expression parsing with operator precedence (low to high): `or`, `xor`, `and`, `not`, primary
+   - Supports parenthesized expressions
 
 3. **Interpreter** (`Interpreter.cs`) - Execution
    - Input: `IEnumerable<Ast.Statement>` from Parser
@@ -48,6 +50,7 @@ The interpreter follows a classic three-stage pipeline architecture with streami
 **AST Nodes** (`Ast/Nodes.cs`):
 - Base: `Node`, `Statement`, `Expression`, `Value`
 - Values: `Number`, `String`, `Boolean`, `Variable`
+- Operations: `AndOp`, `OrOp`, `XorOp`, `NotOp`
 - Statements: `Assign`, `Output`
 - Root: `Program`
 
