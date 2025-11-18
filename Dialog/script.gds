@@ -10,4 +10,4 @@ c = "test"
 x = 42.0
 y = true
 
-as = 12 > true
+as = 1 > "12.0"

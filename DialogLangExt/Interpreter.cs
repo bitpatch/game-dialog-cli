@@ -168,9 +168,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Boolean EvaluateGreaterThanOp(Ast.GreaterThanOp op)
         {
-            var left = EvaluateExpression(op.Left);
-            var right = EvaluateExpression(op.Right);
-            var diff = CompareNumeric(left, right, op.Left.Position, op.Right.Position);
+            var diff = CompareNumeric(op.Left, op.Right);
             return new Boolean(diff > float.Epsilon);
         }
 
@@ -179,9 +177,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Boolean EvaluateLessThanOp(Ast.LessThanOp op)
         {
-            var left = EvaluateExpression(op.Left);
-            var right = EvaluateExpression(op.Right);
-            var diff = CompareNumeric(left, right, op.Left.Position, op.Right.Position);
+            var diff = CompareNumeric(op.Left, op.Right);
             return new Boolean(diff < -float.Epsilon);
         }
 
@@ -190,9 +186,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Boolean EvaluateGreaterOrEqualOp(Ast.GreaterOrEqualOp op)
         {
-            var left = EvaluateExpression(op.Left);
-            var right = EvaluateExpression(op.Right);
-            var diff = CompareNumeric(left, right, op.Left.Position, op.Right.Position);
+            var diff = CompareNumeric(op.Left, op.Right);
             return new Boolean(diff > -float.Epsilon);
         }
 
@@ -201,9 +195,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Boolean EvaluateLessOrEqualOp(Ast.LessOrEqualOp op)
         {
-            var left = EvaluateExpression(op.Left);
-            var right = EvaluateExpression(op.Right);
-            var diff = CompareNumeric(left, right, op.Left.Position, op.Right.Position);
+            var diff = CompareNumeric(op.Left, op.Right);
             return new Boolean(diff < float.Epsilon);
         }
 
@@ -290,16 +282,27 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Compares two numeric values
         /// </summary>
-        private float CompareNumeric(RuntimeValue left, RuntimeValue right, TokenPosition leftPos, TokenPosition rightPos)
+        private float CompareNumeric(Ast.Expression left, Ast.Expression right)
         {
-            return (left, right) switch
+            var leftValue = EvaluateExpression(left);
+            var rightValue = EvaluateExpression(right);
+
+            return (leftValue, rightValue) switch
             {
                 (Integer l, Integer r) => l.Value - r.Value,
                 (Float l, Float r) => l.Value - r.Value,
                 (Integer l, Float r) => l.Value - r.Value,
                 (Float l, Integer r) => l.Value - r.Value,
-                _ => throw new TypeMismatchException(typeof(Number), left, leftPos)
+                (not Number, Number) => throw CompareException(leftValue, rightValue, left.Position),
+                (Number, not Number) => throw CompareException(leftValue, rightValue, right.Position),
+                _ => throw CompareException(leftValue, rightValue, new TokenPosition(left.Position.Line, left.Position.StartColumn, right.Position.EndColumn))
+                
             };
+        }
+
+        ScriptException CompareException(RuntimeValue left, RuntimeValue right, TokenPosition position)
+        {
+            return new ScriptException($"Cannot compare {left.GetType().Name} and {right.GetType().Name}", position);
         }
 
         /// <summary>
