@@ -47,21 +47,18 @@ namespace BitPatch.DialogLang
     {
         public TokenType Type { get; }
         public string Value { get; }
-        public TokenPosition Position { get; }
-        
-        public int Line => Position.Line;
-        public int Column => Position.Column;
+        public Location Location { get; }
 
         public Token(TokenType type, string value, int line, int column)
-            : this(type, value, new TokenPosition(line, column))
+            : this(type, value, new Location(line, column))
         {
         }
 
-        public Token(TokenType type, string value, TokenPosition position)
+        public Token(TokenType type, string value, Location location)
         {
             Type = type;
             Value = value;
-            Position = position;
+            Location = location;
         }
 
         public bool IsEndOfFile()
@@ -74,9 +71,14 @@ namespace BitPatch.DialogLang
             return Type == TokenType.Newline || Type == TokenType.EndOfFile;
         }
 
+        public static Token EndOfFile(Location location)
+        {
+            return new Token(TokenType.EndOfFile, string.Empty, location);
+        }
+
         public override string ToString()
         {
-            return $"Token({Type}, '{Value}', Line: {Line}, Col: {Column})";
+            return $"Token({Type}, '{Value}', {Location})";
         }
     }
 }

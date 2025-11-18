@@ -39,7 +39,7 @@ namespace BitPatch.DialogLang
                 // Expect newline or EOF after statement
                 if (!_current.IsEndOfStatement())
                 {
-                    throw new InvalidSyntaxException(_current.Position);
+                    throw new InvalidSyntaxException(_current.Location);
                 }
 
                 // Skip newlines after statement
@@ -56,7 +56,7 @@ namespace BitPatch.DialogLang
             {
                 TokenType.Identifier => ParseStatementFromIdentifier(),
                 TokenType.Output => ParseOutput(),
-                _ => throw new InvalidSyntaxException(_current.Position)
+                _ => throw new InvalidSyntaxException(_current.Location)
             };
         }
 
@@ -70,7 +70,7 @@ namespace BitPatch.DialogLang
             return _next.Type switch
             {
                 TokenType.Assign => ParseAssignment(),
-                _ => throw new InvalidSyntaxException(_current.Position)
+                _ => throw new InvalidSyntaxException(_current.Location)
             };
         }
 
@@ -80,13 +80,12 @@ namespace BitPatch.DialogLang
         private Ast.Assign ParseAssignment()
         {
             var identifier = ParseIdentifier();
-            var startPosition = identifier.Position;
+            var startLocation = identifier.Location;
 
             Consume(TokenType.Assign); // consume '='
 
             var expression = ParseExpression();
-            var position = TokenPosition.Span(startPosition, expression.Position);
-            return new Ast.Assign(identifier, expression, position);
+            return new Ast.Assign(identifier, expression, startLocation | expression.Location);
         }
 
         /// <summary>
@@ -94,13 +93,12 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Ast.Output ParseOutput()
         {
-            var startPosition = _current.Position;
+            var startLocation = _current.Location;
 
             Consume(TokenType.Output); // consume '<<'
 
             var expression = ParseExpression();
-            var position = TokenPosition.Span(startPosition, expression.Position);
-            return new Ast.Output(expression, position);
+            return new Ast.Output(expression, startLocation | expression.Location);
         }
 
         private Ast.Identifier ParseIdentifier()
@@ -108,7 +106,7 @@ namespace BitPatch.DialogLang
             var token = _current;
 
             Consume(TokenType.Identifier); // consume identifier
-            return new Ast.Identifier(token.Value, token.Position);
+            return new Ast.Identifier(token.Value, token.Location);
         }
 
         /// <summary>
@@ -131,8 +129,7 @@ namespace BitPatch.DialogLang
             {
                 MoveNext(); // consume 'or'
                 var right = ParseXorExpression();
-                var position = TokenPosition.Span(left.Position, right.Position);
-                left = new Ast.OrOp(left, right, position);
+                left = new Ast.OrOp(left, right, left.Location | right.Location);
             }
 
             return left;
@@ -149,8 +146,7 @@ namespace BitPatch.DialogLang
             {
                 MoveNext(); // consume 'xor'
                 var right = ParseAndExpression();
-                var position = TokenPosition.Span(left.Position, right.Position);
-                left = new Ast.XorOp(left, right, position);
+                left = new Ast.XorOp(left, right, left.Location | right.Location);
             }
 
             return left;
@@ -167,8 +163,7 @@ namespace BitPatch.DialogLang
             {
                 MoveNext(); // consume 'and'
                 var right = ParseComparisonExpression();
-                var position = TokenPosition.Span(left.Position, right.Position);
-                left = new Ast.AndOp(left, right, position);
+                left = new Ast.AndOp(left, right, left.Location | right.Location);
             }
 
             return left;
@@ -186,7 +181,7 @@ namespace BitPatch.DialogLang
                 var opType = _current.Type;
                 MoveNext(); // consume comparison operator
                 var right = ParseNotExpression();
-                var position = TokenPosition.Span(left.Position, right.Position);
+                var position = left.Location | right.Location;
                 
                 left = opType switch
                 {
@@ -196,7 +191,7 @@ namespace BitPatch.DialogLang
                     TokenType.LessOrEqual => new Ast.LessOrEqualOp(left, right, position),
                     TokenType.Equal => new Ast.EqualOp(left, right, position),
                     TokenType.NotEqual => new Ast.NotEqualOp(left, right, position),
-                    _ => throw new InvalidOperationException($"Unexpected comparison operator: {opType}")
+                    _ => throw new NotSupportedException($"Unexpected comparison operator: {opType}")
                 };
             }
 
@@ -225,13 +220,13 @@ namespace BitPatch.DialogLang
                 var opType = _current.Type;
                 MoveNext(); // consume operator
                 var right = ParsePrimaryExpression();
-                var position = TokenPosition.Span(left.Position, right.Position);
+                var location = left.Location | right.Location;
                 
                 left = opType switch
                 {
-                    TokenType.Plus => new Ast.AddOp(left, right, position),
-                    TokenType.Minus => new Ast.SubOp(left, right, position),
-                    _ => throw new InvalidOperationException($"Unexpected operator: {opType}")
+                    TokenType.Plus => new Ast.AddOp(left, right, location),
+                    TokenType.Minus => new Ast.SubOp(left, right, location),
+                    _ => throw new NotSupportedException($"Unexpected operator: {opType}")
                 };
             }
 
@@ -243,13 +238,12 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Ast.Expression ParseNotExpression()
         {
-            if (_current.Type == TokenType.Not)
+            if (_current.Type is TokenType.Not)
             {
-                var startPosition = _current.Position;
+                var startLocation = _current.Location;
                 MoveNext(); // consume 'not'
                 var operand = ParseNotExpression(); // right-associative
-                var position = TokenPosition.Span(startPosition, operand.Position);
-                return new Ast.NotOp(operand, position);
+                return new Ast.NotOp(operand, startLocation | operand.Location);
             }
 
             return ParseAdditiveExpression();
@@ -265,14 +259,14 @@ namespace BitPatch.DialogLang
 
             return token.Type switch
             {
-                TokenType.Integer => new Ast.Integer(int.Parse(token.Value, CultureInfo.InvariantCulture), token.Position),
-                TokenType.Float => new Ast.Float(float.Parse(token.Value, CultureInfo.InvariantCulture), token.Position),
-                TokenType.String => new Ast.String(token.Value, token.Position),
-                TokenType.True => new Ast.Boolean(true, token.Position),
-                TokenType.False => new Ast.Boolean(false, token.Position),
-                TokenType.Identifier => new Ast.Variable(token.Value, token.Position),
+                TokenType.Integer => new Ast.Integer(int.Parse(token.Value, CultureInfo.InvariantCulture), token.Location),
+                TokenType.Float => new Ast.Float(float.Parse(token.Value, CultureInfo.InvariantCulture), token.Location),
+                TokenType.String => new Ast.String(token.Value, token.Location),
+                TokenType.True => new Ast.Boolean(true, token.Location),
+                TokenType.False => new Ast.Boolean(false, token.Location),
+                TokenType.Identifier => new Ast.Variable(token.Value, token.Location),
                 TokenType.LeftParen => ParseParenthesizedExpression(),
-                _ => throw new InvalidSyntaxException(token.Position)
+                _ => throw new InvalidSyntaxException(token.Location)
             };
         }
 
@@ -283,9 +277,9 @@ namespace BitPatch.DialogLang
         {
             var expression = ParseExpression();
 
-            if (_current.Type != TokenType.RightParen)
+            if (_current.Type is not TokenType.RightParen)
             {
-                throw new InvalidSyntaxException(_current.Position);
+                throw new InvalidSyntaxException(_current.Location);
             }
 
             MoveNext(); // consume ')'
@@ -298,7 +292,7 @@ namespace BitPatch.DialogLang
         private void MoveNext()
         {
             _current = _next;
-            _next = _tokens.MoveNext() ? _tokens.Current : new Token(TokenType.EndOfFile, string.Empty, _current.Position);
+            _next = _tokens.MoveNext() ? _tokens.Current : Token.EndOfFile(_current.Location);
         }
 
         /// <summary>

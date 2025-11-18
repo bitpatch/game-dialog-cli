@@ -95,12 +95,12 @@ namespace BitPatch.DialogLang
 
             if (left is not Boolean leftBool)
             {
-                throw new TypeMismatchException(typeof(Boolean), left, andOp.Left.Position);
+                throw new TypeMismatchException(typeof(Boolean), left, andOp.Left.Location);
             }
 
             if (right is not Boolean rightBool)
             {
-                throw new TypeMismatchException(typeof(Boolean), right, andOp.Right.Position);
+                throw new TypeMismatchException(typeof(Boolean), right, andOp.Right.Location);
             }
 
             return leftBool.Value && rightBool.Value;
@@ -116,12 +116,12 @@ namespace BitPatch.DialogLang
 
             if (left is not Boolean leftBool)
             {
-                throw new TypeMismatchException(typeof(Boolean), left, orOp.Left.Position);
+                throw new TypeMismatchException(typeof(Boolean), left, orOp.Left.Location);
             }
 
             if (right is not Boolean rightBool)
             {
-                throw new TypeMismatchException(typeof(Boolean), right, orOp.Right.Position);
+                throw new TypeMismatchException(typeof(Boolean), right, orOp.Right.Location);
             }
 
             return leftBool.Value || rightBool.Value;
@@ -137,12 +137,12 @@ namespace BitPatch.DialogLang
 
             if (left is not Boolean leftBool)
             {
-                throw new TypeMismatchException(typeof(Boolean), left, xorOp.Left.Position);
+                throw new TypeMismatchException(typeof(Boolean), left, xorOp.Left.Location);
             }
 
             if (right is not Boolean rightBool)
             {
-                throw new TypeMismatchException(typeof(Boolean), right, xorOp.Right.Position);
+                throw new TypeMismatchException(typeof(Boolean), right, xorOp.Right.Location);
             }
 
             return leftBool.Value ^ rightBool.Value;
@@ -157,7 +157,7 @@ namespace BitPatch.DialogLang
 
             if (operand is not Boolean boolOperand)
             {
-                throw new TypeMismatchException(typeof(Boolean), operand, notOp.Operand.Position);
+                throw new TypeMismatchException(typeof(Boolean), operand, notOp.Operand.Location);
             }
 
             return !boolOperand.Value;
@@ -240,8 +240,8 @@ namespace BitPatch.DialogLang
                 (Float l, Float r) => new Float(l.Value + r.Value),
                 (Integer l, Float r) => new Float(l.Value + r.Value),
                 (Float l, Integer r) => new Float(l.Value + r.Value),
-                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Position),
-                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Position)
+                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Location),
+                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Location)
             };
         }
 
@@ -259,8 +259,8 @@ namespace BitPatch.DialogLang
                 (Float l, Float r) => new Float(l.Value - r.Value),
                 (Integer l, Float r) => new Float(l.Value - r.Value),
                 (Float l, Integer r) => new Float(l.Value - r.Value),
-                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Position),
-                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Position)
+                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Location),
+                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Location)
             };
         }
 
@@ -293,16 +293,16 @@ namespace BitPatch.DialogLang
                 (Float l, Float r) => l.Value - r.Value,
                 (Integer l, Float r) => l.Value - r.Value,
                 (Float l, Integer r) => l.Value - r.Value,
-                (not Number, Number) => throw CompareException(leftValue, rightValue, left.Position),
-                (Number, not Number) => throw CompareException(leftValue, rightValue, right.Position),
-                _ => throw CompareException(leftValue, rightValue, new TokenPosition(left.Position.Line, left.Position.StartColumn, right.Position.EndColumn))
+                (not Number, Number) => throw CompareException(leftValue, rightValue, left.Location),
+                (Number, not Number) => throw CompareException(leftValue, rightValue, right.Location),
+                _ => throw CompareException(leftValue, rightValue, left.Location | right.Location)
                 
             };
         }
 
-        ScriptException CompareException(RuntimeValue left, RuntimeValue right, TokenPosition position)
+        ScriptException CompareException(RuntimeValue left, RuntimeValue right, Location location)
         {
-            return new ScriptException($"Cannot compare {left.GetType().Name} and {right.GetType().Name}", position);
+            return new ScriptException($"Cannot compare {left.GetType().Name} and {right.GetType().Name}", location);
         }
 
         /// <summary>
@@ -329,7 +329,7 @@ namespace BitPatch.DialogLang
                 return value;
             }
 
-            throw new ScriptException($"Variable '{variable.Name}' is not defined", variable.Position);
+            throw new ScriptException($"Variable '{variable.Name}' is not defined", variable.Location);
         }
 
         /// <summary>

@@ -40,7 +40,7 @@ try
 catch (ScriptException ex)
 {
     Console.WriteLine($"{ex.Message}, line {ex.Line}");
-    PrintScriptError(scriptPath, ex.Line, ex.StartColumn, ex.EndColumn);
+    PrintScriptError(scriptPath, ex.Line, ex.Initial, ex.Final);
     return 1;
 }
 catch (Exception ex)

@@ -96,18 +96,18 @@ namespace BitPatch.DialogLang
             if (_current == '<')
             {
                 MoveNextChar(); // consume second '<'
-                var position = new TokenPosition(line, startColumn, _column);
+                var position = new Location(line, startColumn, _column);
                 return new Token(TokenType.Output, "<<", position);
             }
             
             if (_current == '=')
             {
                 MoveNextChar(); // consume '='
-                var position = new TokenPosition(line, startColumn, _column);
+                var position = new Location(line, startColumn, _column);
                 return new Token(TokenType.LessOrEqual, "<=", position);
             }
             
-            var finalPosition = new TokenPosition(line, startColumn, _column);
+            var finalPosition = new Location(line, startColumn, _column);
             return new Token(TokenType.LessThan, "<", finalPosition);
         }
         
@@ -124,11 +124,11 @@ namespace BitPatch.DialogLang
             if (_current == '=')
             {
                 MoveNextChar(); // consume '='
-                var position = new TokenPosition(line, startColumn, _column);
+                var position = new Location(line, startColumn, _column);
                 return new Token(TokenType.GreaterOrEqual, ">=", position);
             }
             
-            var finalPosition = new TokenPosition(line, startColumn, _column);
+            var finalPosition = new Location(line, startColumn, _column);
             return new Token(TokenType.GreaterThan, ">", finalPosition);
         }
         
@@ -145,11 +145,11 @@ namespace BitPatch.DialogLang
             if (_current == '=')
             {
                 MoveNextChar(); // consume second '='
-                var position = new TokenPosition(line, startColumn, _column);
+                var position = new Location(line, startColumn, _column);
                 return new Token(TokenType.Equal, "==", position);
             }
             
-            var finalPosition = new TokenPosition(line, startColumn, _column);
+            var finalPosition = new Location(line, startColumn, _column);
             return new Token(TokenType.Assign, "=", finalPosition);
         }
         
@@ -166,7 +166,7 @@ namespace BitPatch.DialogLang
             if (_current == '=')
             {
                 MoveNextChar(); // consume '='
-                var position = new TokenPosition(line, startColumn, _column);
+                var position = new Location(line, startColumn, _column);
                 return new Token(TokenType.NotEqual, "!=", position);
             }
             
@@ -181,7 +181,7 @@ namespace BitPatch.DialogLang
             var line = _line;
             var startColumn = _column;
             MoveNextChar();
-            var position = new TokenPosition(line, startColumn, _column);
+            var position = new Location(line, startColumn, _column);
             return new Token(type, value, position);
         }
 
@@ -218,7 +218,7 @@ namespace BitPatch.DialogLang
                 }
             }
 
-            var position = new TokenPosition(line, startColumn, _column);
+            var position = new Location(line, startColumn, _column);
             var tokenType = isFloat ? TokenType.Float : TokenType.Integer;
             return new Token(tokenType, _buffer.ToString(), position);
         }
@@ -238,7 +238,7 @@ namespace BitPatch.DialogLang
                 MoveNextChar();
             }
 
-            var position = new TokenPosition(line, startColumn, _column);
+            var position = new Location(line, startColumn, _column);
             var value = _buffer.ToString();
 
             // Check for keywords
@@ -310,7 +310,7 @@ namespace BitPatch.DialogLang
             // Skip closing quote
             MoveNextChar();
 
-            var position = new TokenPosition(line, startColumn, _column);
+            var position = new Location(line, startColumn, _column);
             return new Token(TokenType.String, _buffer.ToString(), position);
         }
 
@@ -341,7 +341,7 @@ namespace BitPatch.DialogLang
                 }
             }
 
-            var position = new TokenPosition(line, startColumn, _column);
+            var position = new Location(line, startColumn, _column);
             return new Token(TokenType.Newline, "\n", position);
         }
 

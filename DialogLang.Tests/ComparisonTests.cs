@@ -140,8 +140,8 @@ public class ComparisonTests
     {
         // Act
         var exception = Assert.Throws<ScriptException>(() => ExecuteScript(script));
-        Assert.Equal(startColumn, exception.StartColumn);
-        Assert.Equal(endColumn, exception.EndColumn);
+        Assert.Equal(startColumn, exception.Initial);
+        Assert.Equal(endColumn, exception.Final);
     }
 
     [Theory]
@@ -184,8 +184,8 @@ public class ComparisonTests
             << a > b
             """));
 
-        Assert.Equal(8, ex.StartColumn);
-        Assert.Equal(9, ex.EndColumn);
+        Assert.Equal(8, ex.Initial);
+        Assert.Equal(9, ex.Final);
     }
 
     [Fact]
@@ -198,8 +198,8 @@ public class ComparisonTests
             << name < age
             """));
 
-        Assert.Equal(4, ex.StartColumn);
-        Assert.Equal(8, ex.EndColumn);
+        Assert.Equal(4, ex.Initial);
+        Assert.Equal(8, ex.Final);
 
         // Boolean vs Number
         ex = Assert.Throws<ScriptException>(() => ExecuteScript("""
@@ -208,8 +208,8 @@ public class ComparisonTests
             << value >= flag
             """));
 
-        Assert.Equal(13, ex.StartColumn);
-        Assert.Equal(17, ex.EndColumn);
+        Assert.Equal(13, ex.Initial);
+        Assert.Equal(17, ex.Final);
 
         // String vs Boolean
         ex = Assert.Throws<ScriptException>(() => ExecuteScript("""
@@ -218,8 +218,8 @@ public class ComparisonTests
             << text > bool
             """));
 
-        Assert.Equal(4, ex.StartColumn);
-        Assert.Equal(15, ex.EndColumn);
+        Assert.Equal(4, ex.Initial);
+        Assert.Equal(15, ex.Final);
     }
 
     [Fact]

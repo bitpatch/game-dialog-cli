@@ -60,7 +60,7 @@ The interpreter follows a classic three-stage pipeline architecture with streami
 - Statements: `Assign`, `Output`
 - Root: `Program`
 
-All nodes are immutable records with `TokenPosition` for error reporting.
+All nodes are immutable records with `Location` for error reporting.
 
 #### Streaming Architecture Instructions
 

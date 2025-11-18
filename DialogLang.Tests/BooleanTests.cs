@@ -117,6 +117,6 @@ public class BooleanTests
     public void TypeMismatch(string script, int expectedColumn)
     {
         var exception = Assert.Throws<TypeMismatchException>(() => ExecuteScript(script));
-        Assert.Equal(expectedColumn, exception.Column);
+        Assert.Equal(expectedColumn, exception.Initial);
     }
 }

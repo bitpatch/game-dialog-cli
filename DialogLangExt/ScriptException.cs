@@ -7,45 +7,45 @@ namespace BitPatch.DialogLang
     /// </summary>
     public class ScriptException : Exception
     {
-        public int Line => Position.Line;
-        public int Column => Position.Column;
-        public int StartColumn => Position.StartColumn;
-        public int EndColumn => Position.EndColumn;
-        private TokenPosition Position { get; }
+        public int Line => Location.Line;
+        public int Initial => Location.Initial;
+        public int Final => Location.Final;
+        
+        private Location Location { get; }
 
-        internal ScriptException(string message, TokenPosition position) : base(message)
+        internal ScriptException(string message, Location location) : base(message)
         {
-            Position = position;
+            Location = location;
         }
     }
 
     public class InvalidSyntaxException : ScriptException
     {
-        internal InvalidSyntaxException(TokenPosition position)
-            : base("Invalid syntax", position)
+        internal InvalidSyntaxException(Location location)
+            : base("Invalid syntax", location)
         {
         }
 
         internal InvalidSyntaxException(int line, int column)
-            : this(new TokenPosition(line, column))
+            : this(new Location(line, column))
         {
         }
 
-        internal InvalidSyntaxException(string message, TokenPosition position)
-            : base(message, position)
+        internal InvalidSyntaxException(string message, Location location)
+            : base(message, location)
         {
         }
 
         internal InvalidSyntaxException(string message, int line, int column)
-            : base(message, new TokenPosition(line, column))
+            : base(message, new Location(line, column))
         {
         }
     }
 
     public class TypeMismatchException : ScriptException
     {
-        internal TypeMismatchException(Type expected, RuntimeValue actual, TokenPosition position)
-            : base($"Wrong type, got {actual.GetType().Name} instead of {expected.Name}", position)
+        internal TypeMismatchException(Type expected, RuntimeValue actual, Location location)
+            : base($"Wrong type, got {actual.GetType().Name} instead of {expected.Name}", location)
         {
         }
     }
