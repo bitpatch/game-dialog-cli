@@ -30,9 +30,9 @@ try
     }
 
     Console.WriteLine("\nVariables:");
-    foreach (var variable in dialog.Variables)
+    foreach (var (name, value) in dialog.Variables)
     {
-        Console.WriteLine($"  {variable.Key} = {variable.Value}");
+        Console.WriteLine($"  {name} = {value}");
     }
 
     return 0;

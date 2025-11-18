@@ -42,18 +42,8 @@ namespace BitPatch.DialogLang
 
     public class TypeMismatchException : ScriptException
     {
-        internal TypeMismatchException(string expected, string actual, TokenPosition position)
-            : base($"Type mismatch: expected {expected}, got {actual}", position)
-        {
-        }
-
-        internal TypeMismatchException(string message, TokenPosition position)
-            : base(message, position)
-        {
-        }
-
-        internal TypeMismatchException(string message, int line, int column)
-            : base(message, new TokenPosition(line, column))
+        internal TypeMismatchException(Type expected, RuntimeValue actual, TokenPosition position)
+            : base($"Wrong type, got {actual.GetType().Name} instead of {expected.Name}", position)
         {
         }
     }

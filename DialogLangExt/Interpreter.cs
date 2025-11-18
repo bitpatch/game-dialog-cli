@@ -8,17 +8,17 @@ namespace BitPatch.DialogLang
     /// </summary>
     internal class Interpreter
     {
-        private readonly Dictionary<string, object> _variables;
+        private readonly Dictionary<string, RuntimeValue> _variables;
 
         public Interpreter()
         {
-            _variables = new Dictionary<string, object>();
+            _variables = new Dictionary<string, RuntimeValue>();
         }
 
         /// <summary>
         /// Gets all variables in the current scope
         /// </summary>
-        public IReadOnlyDictionary<string, object> Variables => _variables;
+        public IReadOnlyDictionary<string, RuntimeValue> Variables => _variables;
 
         /// <summary>
         /// Executes statements one by one as they arrive (streaming), yielding output values
@@ -30,7 +30,7 @@ namespace BitPatch.DialogLang
                 switch (statement)
                 {
                     case Ast.Output output:
-                        yield return EvaluateExpression(output.Expression);
+                        yield return EvaluateExpression(output.Expression).ToObject();
                         break;
                     case Ast.Assign assign:
                         ExecuteAssignment(assign);
@@ -60,18 +60,18 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Evaluates an expression and returns its value
         /// </summary>
-        private object EvaluateExpression(Ast.Expression expression)
+        private RuntimeValue EvaluateExpression(Ast.Expression expression)
         {
             return expression switch
             {
-                Ast.Number number => number.Value,
-                Ast.String str => str.Value,
-                Ast.Boolean boolean => boolean.Value,
+                Ast.Number number => new Number(number.Value),
+                Ast.String str => new String(str.Value),
+                Ast.Boolean boolean => new Boolean(boolean.Value),
                 Ast.Variable variable => EvaluateVariable(variable),
-                Ast.AndOp andOp => EvaluateAndOp(andOp),
-                Ast.OrOp orOp => EvaluateOrOp(orOp),
-                Ast.XorOp xorOp => EvaluateXorOp(xorOp),
-                Ast.NotOp notOp => EvaluateNotOp(notOp),
+                Ast.AndOp andOp => new Boolean(EvaluateAndOp(andOp)),
+                Ast.OrOp orOp => new Boolean(EvaluateOrOp(orOp)),
+                Ast.XorOp xorOp => new Boolean(EvaluateXorOp(xorOp)),
+                Ast.NotOp notOp => new Boolean(EvaluateNotOp(notOp)),
                 _ => throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}")
             };
         }
@@ -84,17 +84,17 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(andOp.Left);
             var right = EvaluateExpression(andOp.Right);
 
-            if (left is not bool leftBool)
+            if (left is not Boolean leftBool)
             {
-                throw new TypeMismatchException("Boolean", left.GetType().Name, andOp.Left.Position);
+                throw new TypeMismatchException(typeof(Boolean), left, andOp.Left.Position);
             }
 
-            if (right is not bool rightBool)
+            if (right is not Boolean rightBool)
             {
-                throw new TypeMismatchException("Boolean", right.GetType().Name, andOp.Right.Position);
+                throw new TypeMismatchException(typeof(Boolean), right, andOp.Right.Position);
             }
 
-            return leftBool && rightBool;
+            return leftBool.Value && rightBool.Value;
         }
 
         /// <summary>
@@ -105,17 +105,17 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(orOp.Left);
             var right = EvaluateExpression(orOp.Right);
 
-            if (left is not bool leftBool)
+            if (left is not Boolean leftBool)
             {
-                throw new TypeMismatchException("Boolean", left.GetType().Name, orOp.Left.Position);
+                throw new TypeMismatchException(typeof(Boolean), left, orOp.Left.Position);
             }
 
-            if (right is not bool rightBool)
+            if (right is not Boolean rightBool)
             {
-                throw new TypeMismatchException("Boolean", right.GetType().Name, orOp.Right.Position);
+                throw new TypeMismatchException(typeof(Boolean), right, orOp.Right.Position);
             }
 
-            return leftBool || rightBool;
+            return leftBool.Value || rightBool.Value;
         }
 
         /// <summary>
@@ -126,17 +126,17 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(xorOp.Left);
             var right = EvaluateExpression(xorOp.Right);
 
-            if (left is not bool leftBool)
+            if (left is not Boolean leftBool)
             {
-                throw new TypeMismatchException("Boolean", left.GetType().Name, xorOp.Left.Position);
+                throw new TypeMismatchException(typeof(Boolean), left, xorOp.Left.Position);
             }
 
-            if (right is not bool rightBool)
+            if (right is not Boolean rightBool)
             {
-                throw new TypeMismatchException("Boolean", right.GetType().Name, xorOp.Right.Position);
+                throw new TypeMismatchException(typeof(Boolean), right, xorOp.Right.Position);
             }
 
-            return leftBool ^ rightBool;
+            return leftBool.Value ^ rightBool.Value;
         }
 
         /// <summary>
@@ -146,15 +146,15 @@ namespace BitPatch.DialogLang
         {
             var operand = EvaluateExpression(notOp.Operand);
 
-            if (operand is not bool boolOperand)
+            if (operand is not Boolean boolOperand)
             {
-                throw new TypeMismatchException("Boolean", operand.GetType().Name, notOp.Operand.Position);
+                throw new TypeMismatchException(typeof(Boolean), operand, notOp.Operand.Position);
             }
 
-            return !boolOperand;
+            return !boolOperand.Value;
         }
 
-        private object EvaluateVariable(Ast.Variable variable)
+        private RuntimeValue EvaluateVariable(Ast.Variable variable)
         {
             if (_variables.TryGetValue(variable.Name, out var value))
             {
@@ -169,7 +169,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         public object? GetVariable(string name)
         {
-            return _variables.TryGetValue(name, out var value) ? value : null;
+            return _variables.TryGetValue(name, out var value) ? value.ToObject() : null;
         }
 
         /// <summary>

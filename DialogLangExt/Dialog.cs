@@ -74,9 +74,18 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Gets all variables
+        /// Gets all variables as a sequence of name-value pairs
         /// </summary>
-        public IReadOnlyDictionary<string, object> Variables => _interpreter.Variables;
+        public IEnumerable<(string name, object value)> Variables
+        {
+            get
+            {
+                foreach (var kvp in _interpreter.Variables)
+                {
+                    yield return (kvp.Key, kvp.Value.ToObject());
+                }
+            }
+        }
 
         /// <summary>
         /// Clears all variables
