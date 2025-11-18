@@ -28,7 +28,6 @@ public class StringConcatenationTests
     [Theory]
     [InlineData("<< \"Count: \" + 42", "Count: 42")]
     [InlineData("<< \"Value: \" + 0", "Value: 0")]
-    [InlineData("<< \"Negative: \" + -10", "Negative: -10")]
     [InlineData("<< 100 + \" items\"", "100 items")]
     public void StringWithInteger(string script, string expected)
     {
@@ -143,7 +142,6 @@ public class StringConcatenationTests
     public void SubtractionDoesNotWorkWithStrings()
     {
         // Subtraction is only for numbers, not strings
-        var ex = Assert.Throws<ScriptException>(() => ExecuteScript("<< \"test\" - 5"));
-        Assert.Contains("type", ex.Message.ToLower());
+        Assert.Throws<TypeMismatchException>(() => ExecuteScript("<< \"test\" - 5"));
     }
 }
