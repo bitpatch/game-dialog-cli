@@ -24,7 +24,7 @@ The interpreter follows a classic three-stage pipeline architecture with streami
    - Input: `TextReader` with source code
    - Output: `IEnumerable<Token>` (streaming)
    - Converts source text into tokens using `yield return`
-   - Token types: `Integer`, `Float`, `String`, `True`, `False`, `Identifier`, `Assign` (=), `Output` (<<), `And`, `Or`, `Not`, `Xor`, `GreaterThan` (>), `LessThan` (<), `GreaterOrEqual` (>=), `LessOrEqual` (<=), `Equal` (==), `NotEqual` (!=), `LeftParen` (, `RightParen` ), `Newline`, `EndOfFile`
+   - Token types: `Integer`, `Float`, `String`, `True`, `False`, `Identifier`, `Assign` (=), `Output` (<<), `Plus` (+), `Minus` (-), `And`, `Or`, `Not`, `Xor`, `GreaterThan` (>), `LessThan` (<), `GreaterOrEqual` (>=), `LessOrEqual` (<=), `Equal` (==), `NotEqual` (!=), `LeftParen` (, `RightParen` ), `Newline`, `EndOfFile`
    - Keywords: `true`, `false`, `and`, `or`, `not`, `xor`
 
 2. **Parser** (`Parser.cs`) - Syntax Analysis
@@ -33,8 +33,9 @@ The interpreter follows a classic three-stage pipeline architecture with streami
    - Builds AST nodes using `yield return`
    - Uses one-token lookahead (`_current` and `_next`)
    - Statement types: `Assign`, `Output`
-   - Expression parsing with operator precedence (low to high): `or`, `xor`, `and`, comparison (`==`, `!=`, `<`, `>`, `<=`, `>=`), `not`, primary
+   - Expression parsing with operator precedence (low to high): `or`, `xor`, `and`, comparison (`==`, `!=`, `<`, `>`, `<=`, `>=`), `not`, additive (`+`, `-`), primary
    - Supports parenthesized expressions
+   - Operator precedence follows Python conventions
 
 3. **Interpreter** (`Interpreter.cs`) - Execution
    - Input: `IEnumerable<Ast.Statement>` from Parser
@@ -42,6 +43,8 @@ The interpreter follows a classic three-stage pipeline architecture with streami
    - Executes statements and yields output values from `<<` statements
    - Maintains variable scope in `Dictionary<string, RuntimeValue>`
    - Comparison operations use epsilon-based comparisons for float values to handle floating-point precision issues
+   - Arithmetic operations: `+` (addition for numbers, concatenation for strings with automatic type conversion), `-` (subtraction for numbers only)
+   - String concatenation: any value can be concatenated with a string using `+`, with automatic conversion to string representation
 
 4. **Public API** (`Dialog.cs`)
    - `Execute(TextReader)` and `Execute(string)` methods
@@ -53,6 +56,7 @@ The interpreter follows a classic three-stage pipeline architecture with streami
 - Values: `Integer`, `Float`, `String`, `Boolean`, `Variable`
 - Logical operations: `AndOp`, `OrOp`, `XorOp`, `NotOp`
 - Comparison operations: `GreaterThanOp`, `LessThanOp`, `GreaterOrEqualOp`, `LessOrEqualOp`, `EqualOp`, `NotEqualOp`
+- Arithmetic operations: `AddOp`, `SubOp`
 - Statements: `Assign`, `Output`
 - Root: `Program`
 
