@@ -55,7 +55,9 @@ namespace BitPatch.DialogLang
             }
 
             using var reader = new StringReader(source);
-            return Execute(reader);
+            foreach (var item in Execute(reader)){
+                yield return item;
+            }
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace BitPatch.DialogLang
         /// <summary>
         /// Gets all variables
         /// </summary>
-        public System.Collections.Generic.IReadOnlyDictionary<string, object> Variables => _interpreter.Variables;
+        public IReadOnlyDictionary<string, object> Variables => _interpreter.Variables;
 
         /// <summary>
         /// Clears all variables
