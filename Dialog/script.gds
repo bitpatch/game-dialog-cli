@@ -10,5 +10,7 @@ c = "test"
 x = 42.0
 y = true
 
-<< "Result: "
-<< y and (false)
+<< "Result: + y and (false)
+
+a = 10
+<< a == 10.0

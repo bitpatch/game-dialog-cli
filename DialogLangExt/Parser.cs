@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System;
+using System.Globalization;
 
 namespace BitPatch.DialogLang
 {
@@ -235,8 +236,8 @@ namespace BitPatch.DialogLang
 
             return token.Type switch
             {
-                TokenType.Integer => new Ast.Integer(int.Parse(token.Value), token.Position),
-                TokenType.Float => new Ast.Float(float.Parse(token.Value), token.Position),
+                TokenType.Integer => new Ast.Integer(int.Parse(token.Value, CultureInfo.InvariantCulture), token.Position),
+                TokenType.Float => new Ast.Float(float.Parse(token.Value, CultureInfo.InvariantCulture), token.Position),
                 TokenType.String => new Ast.String(token.Value, token.Position),
                 TokenType.True => new Ast.Boolean(true, token.Position),
                 TokenType.False => new Ast.Boolean(false, token.Position),
