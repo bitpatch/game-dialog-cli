@@ -11,4 +11,4 @@ x = 42
 y = true
 
 << "Result: "
-<< y and x
+<< y and (false or y)

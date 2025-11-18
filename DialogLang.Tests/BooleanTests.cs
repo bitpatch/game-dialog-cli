@@ -108,14 +108,15 @@ public class BooleanTests
     }
 
     [Theory]
-    [InlineData("<< true and 5")]
-    [InlineData("<< 42 and false")]
-    [InlineData("<< false or \"hello\"")]
-    [InlineData("<< true xor 10")]
-    [InlineData("<< not \"test\"")]
-    [InlineData("<< not 123")]
-    public void TypeMismatch(string script)
+    [InlineData("<< true and 5", 13)]
+    [InlineData("<< 42 and false", 4)]
+    [InlineData("<< false or \"hello\"", 13)]
+    [InlineData("<< true xor 10", 13)]
+    [InlineData("<< not \"test\"", 8)]
+    [InlineData("<< not (true or  123)", 18)]
+    public void TypeMismatch(string script, int expectedColumn)
     {
-        Assert.Throws<TypeMismatchException>(() => ExecuteScript(script));
+        var exception = Assert.Throws<TypeMismatchException>(() => ExecuteScript(script));
+        Assert.Equal(expectedColumn, exception.Column);
     }
 }
