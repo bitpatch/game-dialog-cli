@@ -10,6 +10,8 @@ public class ArithmeticTests
     [InlineData("<< 5 - 3", 2)]
     [InlineData("<< 5 * 3", 15)]
     [InlineData("<< 7 * 8", 56)]
+    [InlineData("<< -5", -5)]
+    [InlineData("<< -(-5)", 5)]
     public void Integers(string script, int expected)
     {
         // Act
@@ -29,6 +31,7 @@ public class ArithmeticTests
     [InlineData("<< 20 / 4", 5.0f)]
     [InlineData("<< 2.5 * 4.0", 10.0f)]
     [InlineData("<< 10.0 / 2.0", 5.0f)]
+    [InlineData("<< -2.5", -2.5f)]
     public void Floats(string script, float expected)
     {
         // Act
@@ -46,6 +49,9 @@ public class ArithmeticTests
     [InlineData("<< 100 - (50 + 25)", 25)]
     [InlineData("<< 2 + 3 * 4", 14)]
     [InlineData("<< (2 + 3) * 4", 20)]
+    [InlineData("<< -5 + 3", -2)]
+    [InlineData("<< 10 * -2", -20)]
+    [InlineData("<< -2 * 3", -6)]
     public void Precedence(string script, int expected)
     {
         // Act

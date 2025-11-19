@@ -83,6 +83,7 @@ namespace BitPatch.DialogLang
                 Ast.SubOp subOp => EvaluateSubOp(subOp),
                 Ast.MulOp mulOp => EvaluateMulOp(mulOp),
                 Ast.DivOp divOp => EvaluateDivOp(divOp),
+                Ast.NegateOp negateOp => EvaluateNegateOp(negateOp),
                 _ => throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}")
             };
         }
@@ -322,6 +323,21 @@ namespace BitPatch.DialogLang
             {
                 return new ScriptException($"Cannot divide {left.GetType().Name} by {right.GetType().Name}", location);
             }
+        }
+
+        /// <summary>
+        /// Evaluates unary negation operation (-)
+        /// </summary>
+        private RuntimeValue EvaluateNegateOp(Ast.NegateOp op)
+        {
+            var operand = EvaluateExpression(op.Operand);
+
+            return operand switch
+            {
+                Integer i => new Integer(-i.Value),
+                Float f => new Float(-f.Value),
+                _ => throw new ScriptException($"Cannot negate {operand.GetType().Name}", op.Operand.Location)
+            };
         }
 
         /// <summary>

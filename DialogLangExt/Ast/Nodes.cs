@@ -142,6 +142,11 @@ namespace BitPatch.DialogLang.Ast
     /// </summary>
     internal record NotOp(Expression Operand, Location Location) : Expression(Location);
 
+    /// <summary>
+    /// Node representing unary negation operation (-a)
+    /// </summary>
+    internal record NegateOp(Expression Operand, Location Location) : Expression(Location);
+
     // Statements
 
     /// <summary>

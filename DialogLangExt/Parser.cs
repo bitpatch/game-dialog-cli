@@ -238,13 +238,13 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Ast.Expression ParseMultiplicativeExpression()
         {
-            var left = ParsePrimaryExpression();
+            var left = ParseUnaryExpression();
 
             while (_current.Type is TokenType.Multiply or TokenType.Divide)
             {
                 var opType = _current.Type;
                 MoveNext(); // consume operator
-                var right = ParsePrimaryExpression();
+                var right = ParseUnaryExpression();
                 var location = left.Location | right.Location;
                 
                 left = opType switch
@@ -256,6 +256,22 @@ namespace BitPatch.DialogLang
             }
 
             return left;
+        }
+
+        /// <summary>
+        /// Parses unary expression (- and primary)
+        /// </summary>
+        private Ast.Expression ParseUnaryExpression()
+        {
+            if (_current.Type is TokenType.Minus)
+            {
+                var startLocation = _current.Location;
+                MoveNext(); // consume '-'
+                var operand = ParseUnaryExpression(); // right-associative
+                return new Ast.NegateOp(operand, startLocation | operand.Location);
+            }
+
+            return ParsePrimaryExpression();
         }
 
         /// <summary>
