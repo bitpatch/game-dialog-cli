@@ -22,6 +22,8 @@ namespace BitPatch.DialogLang
         Xor,            // xor
         Plus,           // +
         Minus,          // -
+        Multiply,       // *
+        Divide,         // /
         
         // Comparison operators
         GreaterThan,    // >

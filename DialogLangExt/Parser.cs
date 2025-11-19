@@ -213,9 +213,34 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Ast.Expression ParseAdditiveExpression()
         {
-            var left = ParsePrimaryExpression();
+            var left = ParseMultiplicativeExpression();
 
             while (_current.Type is TokenType.Plus or TokenType.Minus)
+            {
+                var opType = _current.Type;
+                MoveNext(); // consume operator
+                var right = ParseMultiplicativeExpression();
+                var location = left.Location | right.Location;
+                
+                left = opType switch
+                {
+                    TokenType.Plus => new Ast.AddOp(left, right, location),
+                    TokenType.Minus => new Ast.SubOp(left, right, location),
+                    _ => throw new NotSupportedException($"Unexpected operator: {opType}")
+                };
+            }
+
+            return left;
+        }
+
+        /// <summary>
+        /// Parses multiplicative expression (* and /)
+        /// </summary>
+        private Ast.Expression ParseMultiplicativeExpression()
+        {
+            var left = ParsePrimaryExpression();
+
+            while (_current.Type is TokenType.Multiply or TokenType.Divide)
             {
                 var opType = _current.Type;
                 MoveNext(); // consume operator
@@ -224,8 +249,8 @@ namespace BitPatch.DialogLang
                 
                 left = opType switch
                 {
-                    TokenType.Plus => new Ast.AddOp(left, right, location),
-                    TokenType.Minus => new Ast.SubOp(left, right, location),
+                    TokenType.Multiply => new Ast.MulOp(left, right, location),
+                    TokenType.Divide => new Ast.DivOp(left, right, location),
                     _ => throw new NotSupportedException($"Unexpected operator: {opType}")
                 };
             }

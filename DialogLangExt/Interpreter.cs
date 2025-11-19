@@ -81,6 +81,8 @@ namespace BitPatch.DialogLang
                 Ast.NotEqualOp notEqual => EvaluateNotEqualOp(notEqual),
                 Ast.AddOp addOp => EvaluateAddOp(addOp),
                 Ast.SubOp subOp => EvaluateSubOp(subOp),
+                Ast.MulOp mulOp => EvaluateMulOp(mulOp),
+                Ast.DivOp divOp => EvaluateDivOp(divOp),
                 _ => throw new NotSupportedException($"Unsupported expression type: {expression.GetType().Name}")
             };
         }
@@ -262,6 +264,53 @@ namespace BitPatch.DialogLang
                 (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Location),
                 _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Location)
             };
+        }
+
+        /// <summary>
+        /// Evaluates multiplication operation (*)
+        /// </summary>
+        private RuntimeValue EvaluateMulOp(Ast.MulOp op)
+        {
+            var left = EvaluateExpression(op.Left);
+            var right = EvaluateExpression(op.Right);
+
+            return (left, right) switch
+            {
+                (Integer l, Integer r) => new Integer(l.Value * r.Value),
+                (Number l, Number r) => new Float(l.FloatValue * r.FloatValue),
+                (Number, not Number) => throw Exception(op.Right.Location),
+                (not Number, Number) => throw Exception(op.Left.Location),
+                _ => throw Exception(op.Left.Location | op.Right.Location)
+            };
+
+            ScriptException Exception(Location location)
+            {
+                return new ScriptException($"Cannot multiply {left.GetType().Name} by {right.GetType().Name}", location);
+            }
+        }
+
+        /// <summary>
+        /// Evaluates division operation (/)
+        /// </summary>
+        private RuntimeValue EvaluateDivOp(Ast.DivOp op)
+        {
+            var left = EvaluateExpression(op.Left);
+            var right = EvaluateExpression(op.Right);
+
+            // Division always returns float to handle cases like 5 / 2 = 2.5
+            return (left, right) switch
+            {
+                (_, Number n) when n.IsNil => throw new ScriptException("Division by zero", op.Right.Location),
+                (Number l, Number r) when !r.IsNil => new Float(l.FloatValue / r.FloatValue),
+                (Number, not Number) => throw Exception(op.Right.Location),
+                (not Number, Number) => throw Exception(op.Left.Location),
+                _ => throw Exception(op.Left.Location | op.Right.Location)
+            };
+
+            ScriptException Exception(Location location)
+            {
+                return new ScriptException($"Cannot divide {left.GetType().Name} by {right.GetType().Name}", location);
+            }
         }
 
         /// <summary>

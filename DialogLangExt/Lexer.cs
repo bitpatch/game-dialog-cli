@@ -73,6 +73,8 @@ namespace BitPatch.DialogLang
                 '!' => ReadFromExclamationMark(),
                 '+' => ReadSingleCharToken(TokenType.Plus, "+"),
                 '-' => ReadSingleCharToken(TokenType.Minus, "-"),
+                '*' => ReadSingleCharToken(TokenType.Multiply, "*"),
+                '/' => ReadSingleCharToken(TokenType.Divide, "/"),
 
                 // Delimiters
                 '(' => ReadSingleCharToken(TokenType.LeftParen, "("),

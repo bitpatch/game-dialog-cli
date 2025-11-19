@@ -15,7 +15,11 @@ namespace BitPatch.DialogLang
     /// <summary>
     /// Base class for numeric runtime values
     /// </summary>
-    internal abstract record Number : RuntimeValue;
+    internal abstract record Number : RuntimeValue
+    {
+        public abstract bool IsNil { get; }
+        public abstract float FloatValue { get; }
+    }
 
     /// <summary>
     /// Integer runtime value
@@ -23,6 +27,8 @@ namespace BitPatch.DialogLang
     internal sealed record Integer(int Value) : Number
     {
         public override object ToObject() => Value;
+        public override bool IsNil => Value is 0;
+        public override float FloatValue => Value;
     }
 
     /// <summary>
@@ -31,6 +37,8 @@ namespace BitPatch.DialogLang
     internal sealed record Float(float Value) : Number
     {
         public override object ToObject() => Value;
+        public override bool IsNil => Value is 0.0f;
+        public override float FloatValue => Value;
     }
 
     /// <summary>

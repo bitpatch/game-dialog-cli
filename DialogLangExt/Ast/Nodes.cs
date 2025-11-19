@@ -125,6 +125,16 @@ namespace BitPatch.DialogLang.Ast
     /// </summary>
     internal record SubOp(Expression Left, Expression Right, Location Location) : Expression(Location);
 
+    /// <summary>
+    /// Node representing multiplication operation (a * b)
+    /// </summary>
+    internal record MulOp(Expression Left, Expression Right, Location Location) : Expression(Location);
+
+    /// <summary>
+    /// Node representing division operation (a / b)
+    /// </summary>
+    internal record DivOp(Expression Left, Expression Right, Location Location) : Expression(Location);
+
     // Unary Operations
 
     /// <summary>
