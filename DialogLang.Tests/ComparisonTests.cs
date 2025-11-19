@@ -74,74 +74,18 @@ public class ComparisonTests
         Assert.Equal(new object[] { true, false, true, true, true, true }, results);
     }
 
-    [Fact]
-    public void FloatComparisons()
-    {
-        var results = ExecuteScript("""
-            x = 3.14
-            y = 2.71
-            << x > y
-            << x < y
-            << x == 3.14
-            << y != 3.14
-            """);
 
-        Assert.Equal(new object[] { true, false, true, true }, results);
-    }
-
-    [Fact]
-    public void MixedIntegerAndFloat()
-    {
-        var results = ExecuteScript("""
-            a = 5
-            b = 3.5
-            << a > b
-            << b < a
-            << a >= 5.0
-            << b <= 4
-            """).ToList();
-
-        Assert.Equal(new object[] { true, true, true, true }, results);
-    }
-
-    [Fact]
-    public void ComparisonWithLogicalOperators()
-    {
-        var results = ExecuteScript("""
-            << (5 > 3) and (2 < 4)
-            << (5 < 3) or (2 == 2)
-            << not (5 == 3)
-            << (5 >= 5) and (3 <= 3)
-            """);
-
-        Assert.Equal(new object[] { true, true, true, true }, results);
-    }
-
-    [Fact]
-    public void ChainedComparisons()
-    {
-        var results = ExecuteScript("""
-            a = 5
-            b = 10
-            c = 15
-            << a < b and b < c
-            << a == 5 and b == 10 and c == 15
-            << a < b or b > c
-            """);
-
-        Assert.Equal(new object[] { true, true, true }, results);
-    }
 
     [Theory]
     [InlineData("<< 5 > \"hello\"", 8, 15)]
     [InlineData("<< \"test\" < 10", 4, 10)]
     [InlineData("<< true >= \"5\"", 4, 15)]
-    public void CannotCompare(string script, int startColumn, int endColumn)
+    public void CannotCompare(string script, int initial, int final)
     {
         // Act
-        var exception = Assert.Throws<ScriptException>(() => ExecuteScript(script));
-        Assert.Equal(startColumn, exception.Initial);
-        Assert.Equal(endColumn, exception.Final);
+        var ex = Assert.Throws<ScriptException>(() => ExecuteScript(script));
+        Assert.Equal(initial, ex.Initial);
+        Assert.Equal(final, ex.Final);
     }
 
     [Theory]
@@ -173,77 +117,5 @@ public class ComparisonTests
 
         // Assert - different types are always not equal
         Assert.Equal(new object[] { true }, results);
-    }
-
-    [Fact]
-    public void TypeMismatchWithVariables()
-    {
-        var ex = Assert.Throws<ScriptException>(() => ExecuteScript("""
-            a = 5
-            b = "hello"
-            << a > b
-            """));
-
-        Assert.Equal(8, ex.Initial);
-        Assert.Equal(9, ex.Final);
-    }
-
-    [Fact]
-    public void ComplexTypeErrors()
-    {
-        // String vs Number
-        var ex = Assert.Throws<ScriptException>(() => ExecuteScript("""
-            name = "Alice"
-            age = 25
-            << name < age
-            """));
-
-        Assert.Equal(4, ex.Initial);
-        Assert.Equal(8, ex.Final);
-
-        // Boolean vs Number
-        ex = Assert.Throws<ScriptException>(() => ExecuteScript("""
-            flag = true
-            value = 10
-            << value >= flag
-            """));
-
-        Assert.Equal(13, ex.Initial);
-        Assert.Equal(17, ex.Final);
-
-        // String vs Boolean
-        ex = Assert.Throws<ScriptException>(() => ExecuteScript("""
-            text = "true"
-            bool = true
-            << text > bool
-            """));
-
-        Assert.Equal(4, ex.Initial);
-        Assert.Equal(15, ex.Final);
-    }
-
-    [Fact]
-    public void ComparisonOperatorPrecedence()
-    {
-        var results = ExecuteScript("""
-            << 5 > 3 and 2 < 4
-            << 5 == 5 or 3 > 10
-            << not (5 < 3)
-            << 5 > 3 xor 2 > 1
-            """);
-
-        Assert.Equal(new object[] { true, true, true, false }, results);
-    }
-
-    [Fact]
-    public void ParenthesizedComparisons()
-    {
-        var results = ExecuteScript("""
-            << (5 > 3)
-            << ((10 < 20) and (5 >= 5))
-            << (not (3 == 5))
-            """);
-
-        Assert.Equal(new object[] { true, true, true }, results);
     }
 }

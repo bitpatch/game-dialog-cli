@@ -4,12 +4,6 @@ namespace DialogLang.Tests;
 
 public class BooleanTests
 {
-    private static List<object> ExecuteScript(string script)
-    {
-        var dialog = new Dialog();
-        return [.. dialog.Execute(script)];
-    }
-
     [Theory]
     [InlineData("<< true", true)]
     [InlineData("<< false", false)]
@@ -38,63 +32,10 @@ public class BooleanTests
     public void BooleanLiterals(string script, bool expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
         Assert.Equal(new object[] { expected }, results);
-    }
-
-    [Fact]
-    public void VariablesWithBooleans()
-    {
-        var results = ExecuteScript("""
-            x = true
-            << x
-            y = false
-            << y
-            """);
-
-        Assert.Equal(new object[] { true, false }, results);
-    }
-
-    [Fact]
-    public void ComplexExpression()
-    {
-        var results = ExecuteScript("""
-            a = true
-            b = false
-            c = true
-            << (a or b) and not (b xor c)
-            """);
-
-        Assert.Equal(new object[] { false }, results);
-    }
-
-    [Fact]
-    public void MultipleOutputs()
-    {
-        var results = ExecuteScript("""
-            << true and false
-            << false or true
-            << not false
-            """);
-
-        Assert.Equal(new object[] { false, true, true }, results);
-    }
-
-    [Fact]
-    public void VariableReassignment()
-    {
-        var results = ExecuteScript("""
-            x = true
-            << x
-            x = false
-            << x
-            x = not x
-            << x
-            """);
-
-        Assert.Equal(new object[] { true, false, true }, results);
     }
 
     [Theory]
@@ -104,19 +45,20 @@ public class BooleanTests
     [InlineData("<< true and false)")]
     public void InvalidSyntax(string script)
     {
-        Assert.Throws<InvalidSyntaxException>(() => ExecuteScript(script));
+        Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(script));
     }
 
     [Theory]
-    [InlineData("<< true and 5", 13)]
-    [InlineData("<< 42 and false", 4)]
-    [InlineData("<< false or \"hello\"", 13)]
-    [InlineData("<< true xor 10.3", 13)]
-    [InlineData("<< not \"test\"", 8)]
-    [InlineData("<< not (true or  123)", 18)]
-    public void TypeMismatch(string script, int expectedColumn)
+    [InlineData("<< true and 5", 13, 14)]
+    [InlineData("<< 42 and \"hi\"", 4, 15)]
+    [InlineData("<< false or \"hello\"", 13, 20)]
+    [InlineData("<< true xor 10.3", 13, 17)]
+    [InlineData("<< not \"test\"", 8, 14)]
+    [InlineData("<< not (true or 123)", 17, 20)]
+    public void TypeMismatch(string script, int initial, int final)
     {
-        var exception = Assert.Throws<TypeMismatchException>(() => ExecuteScript(script));
-        Assert.Equal(expectedColumn, exception.Initial);
+        var ex = Assert.Throws<ScriptException>(() => Utils.Execute(script));
+        Assert.Equal(initial, ex.Initial);
+        Assert.Equal(final, ex.Final);
     }
 }

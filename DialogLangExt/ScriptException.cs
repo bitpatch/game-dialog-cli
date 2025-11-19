@@ -10,7 +10,7 @@ namespace BitPatch.DialogLang
         public int Line => Location.Line;
         public int Initial => Location.Initial;
         public int Final => Location.Final;
-        
+
         private Location Location { get; }
 
         internal ScriptException(string message, Location location) : base(message)

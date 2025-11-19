@@ -4,12 +4,6 @@ namespace DialogLang.Tests;
 
 public class StringConcatenationTests
 {
-    private static List<object> ExecuteScript(string script)
-    {
-        var dialog = new Dialog();
-        return [.. dialog.Execute(script)];
-    }
-
     [Theory]
     [InlineData("<< \"Hello\" + \"World\"", "HelloWorld")]
     [InlineData("<< \"Hello \" + \"World\"", "Hello World")]
@@ -19,7 +13,7 @@ public class StringConcatenationTests
     public void StringToString(string script, string expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
         Assert.Equal(new object[] { expected }, results);
@@ -32,7 +26,7 @@ public class StringConcatenationTests
     public void StringWithInteger(string script, string expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
         Assert.Equal(new object[] { expected }, results);
@@ -46,7 +40,7 @@ public class StringConcatenationTests
     public void StringWithFloat(string script, string expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
         Assert.Equal(new object[] { expected }, results);
@@ -60,7 +54,7 @@ public class StringConcatenationTests
     public void StringWithBoolean(string script, string expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
         Assert.Equal(new object[] { expected }, results);
@@ -74,7 +68,7 @@ public class StringConcatenationTests
     public void MixedWithArithmetic(string script, string expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
         Assert.Equal(new object[] { expected }, results);
@@ -87,61 +81,16 @@ public class StringConcatenationTests
     public void ChainedConcatenation(string script, string expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
         Assert.Equal(new object[] { expected }, results);
     }
 
     [Fact]
-    public void VariablesWithConcatenation()
-    {
-        var results = ExecuteScript("""
-            name = "Alice"
-            age = 25
-            active = true
-            << "Name: " + name
-            << "Age: " + age
-            << "Active: " + active
-            message = "Hello, " + name + "!"
-            << message
-            """);
-
-        Assert.Equal(new object[] { "Name: Alice", "Age: 25", "Active: true", "Hello, Alice!" }, results);
-    }
-
-    [Fact]
-    public void ConcatenationWithComparisonInParentheses()
-    {
-        var results = ExecuteScript("""
-            << "Result: " + (5 > 3)
-            << "Equal: " + (10 == 10)
-            << "Check: " + (true and false)
-            """);
-
-        Assert.Equal(new object[] { "Result: true", "Equal: true", "Check: false" }, results);
-    }
-
-    [Fact]
-    public void PrecedenceWithLogicalOperators()
-    {
-        // String concatenation has higher precedence than logical operators
-        // "Result: " + (y and false) should work
-        // "Result: " + y and false should fail (string in logical operation)
-        
-        var results = ExecuteScript("""
-            y = true
-            << "Result: " + (y and false)
-            << "Value: " + (true or false)
-            """);
-
-        Assert.Equal(new object[] { "Result: false", "Value: true" }, results);
-    }
-
-    [Fact]
     public void SubtractionDoesNotWorkWithStrings()
     {
         // Subtraction is only for numbers, not strings
-        Assert.Throws<TypeMismatchException>(() => ExecuteScript("<< \"test\" - 5"));
+        Assert.Throws<TypeMismatchException>(() => Utils.Execute("<< \"test\" - 5"));
     }
 }

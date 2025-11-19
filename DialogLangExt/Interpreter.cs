@@ -93,17 +93,17 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(andOp.Left);
             var right = EvaluateExpression(andOp.Right);
 
-            if (left is not Boolean leftBool)
-            {
-                throw new TypeMismatchException(typeof(Boolean), left, andOp.Left.Location);
-            }
+            return (left, right) switch {
+                (Boolean l, Boolean r) => l.Value && r.Value,
+                (Boolean l, not Boolean) => throw Exception(andOp.Right.Location),
+                (not Boolean, Boolean r) => throw Exception(andOp.Left.Location),
+                _ => throw Exception(andOp.Left.Location | andOp.Right.Location)
+            };
 
-            if (right is not Boolean rightBool)
+            ScriptException Exception(Location location)
             {
-                throw new TypeMismatchException(typeof(Boolean), right, andOp.Right.Location);
+                return new ScriptException($"Cannot evaluate AND operation with types {left.GetType().Name} and {right.GetType().Name}", location);
             }
-
-            return leftBool.Value && rightBool.Value;
         }
 
         /// <summary>
@@ -114,17 +114,17 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(orOp.Left);
             var right = EvaluateExpression(orOp.Right);
 
-            if (left is not Boolean leftBool)
-            {
-                throw new TypeMismatchException(typeof(Boolean), left, orOp.Left.Location);
-            }
+            return (left, right) switch {
+                (Boolean l, Boolean r) => l.Value || r.Value,
+                (Boolean l, not Boolean) => throw Exception(orOp.Right.Location),
+                (not Boolean, Boolean r) => throw Exception(orOp.Left.Location),
+                _ => throw Exception(orOp.Left.Location | orOp.Right.Location)
+            };
 
-            if (right is not Boolean rightBool)
+            ScriptException Exception(Location location)
             {
-                throw new TypeMismatchException(typeof(Boolean), right, orOp.Right.Location);
+                return new ScriptException($"Cannot evaluate OR operation with types {left.GetType().Name} and {right.GetType().Name}", location);
             }
-
-            return leftBool.Value || rightBool.Value;
         }
 
         /// <summary>
@@ -135,17 +135,17 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(xorOp.Left);
             var right = EvaluateExpression(xorOp.Right);
 
-            if (left is not Boolean leftBool)
-            {
-                throw new TypeMismatchException(typeof(Boolean), left, xorOp.Left.Location);
-            }
+            return (left, right) switch {
+                (Boolean l, Boolean r) => l.Value ^ r.Value,
+                (Boolean l, not Boolean) => throw Exception(xorOp.Right.Location),
+                (not Boolean, Boolean r) => throw Exception(xorOp.Left.Location),
+                _ => throw Exception(xorOp.Left.Location | xorOp.Right.Location)
+            };
 
-            if (right is not Boolean rightBool)
+            ScriptException Exception(Location location)
             {
-                throw new TypeMismatchException(typeof(Boolean), right, xorOp.Right.Location);
+                return new ScriptException($"Cannot evaluate XOR operation with types {left.GetType().Name} and {right.GetType().Name}", location);
             }
-
-            return leftBool.Value ^ rightBool.Value;
         }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace BitPatch.DialogLang
 
             if (operand is not Boolean boolOperand)
             {
-                throw new TypeMismatchException(typeof(Boolean), operand, notOp.Operand.Location);
+                throw new ScriptException($"Cannot evaluate NOT operation on type {operand.GetType().Name}", notOp.Operand.Location);
             }
 
             return !boolOperand.Value;
