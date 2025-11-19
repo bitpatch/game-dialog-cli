@@ -235,7 +235,7 @@ namespace BitPatch.DialogLang
             // String concatenation with type conversion
             if (left is String || right is String)
             {
-                return new String(ConvertToString(left) + ConvertToString(right));
+                return new String(left.ToString() + right.ToString());
             }
 
             // Numeric addition
@@ -322,21 +322,6 @@ namespace BitPatch.DialogLang
             {
                 return new ScriptException($"Cannot divide {left.GetType().Name} by {right.GetType().Name}", location);
             }
-        }
-
-        /// <summary>
-        /// Converts a runtime value to string representation
-        /// </summary>
-        private string ConvertToString(RuntimeValue value)
-        {
-            return value switch
-            {
-                String s => s.Value,
-                Integer i => i.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                Float f => f.Value.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                Boolean b => b.Value ? "true" : "false",
-                _ => throw new NotSupportedException($"Cannot convert {value.GetType().Name} to string")
-            };
         }
 
         /// <summary>

@@ -29,6 +29,7 @@ namespace BitPatch.DialogLang
         public override object ToObject() => Value;
         public override bool IsNil => Value is 0;
         public override float FloatValue => Value;
+        public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -39,6 +40,7 @@ namespace BitPatch.DialogLang
         public override object ToObject() => Value;
         public override bool IsNil => Value is 0.0f;
         public override float FloatValue => Value;
+        public override string ToString() => Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -47,6 +49,7 @@ namespace BitPatch.DialogLang
     internal sealed record String(string Value) : RuntimeValue
     {
         public override object ToObject() => Value;
+        public override string ToString() => Value;
     }
 
     /// <summary>
@@ -55,5 +58,6 @@ namespace BitPatch.DialogLang
     internal sealed record Boolean(bool Value) : RuntimeValue
     {
         public override object ToObject() => Value;
+        public override string ToString() => Value ? "true" : "false";
     }
 }
