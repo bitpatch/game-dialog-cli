@@ -75,12 +75,12 @@ namespace BitPatch.DialogLang
 
         public bool IsEndOfFile()
         {
-            return Type == TokenType.EndOfFile;
+            return Type is TokenType.EndOfFile;
         }
 
         public bool IsEndOfStatement()
         {
-            return Type == TokenType.Newline || Type == TokenType.EndOfFile;
+            return Type is TokenType.Newline or TokenType.EndOfFile;
         }
 
         public static Token EndOfFile(Location location)

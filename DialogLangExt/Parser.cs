@@ -5,7 +5,7 @@ using System.Globalization;
 namespace BitPatch.DialogLang
 {
     /// <summary>
-    /// Parser that builds an Abstract Syntax Tree from tokens
+    /// Parser that builds an Abstract Syntax Tree from tokens.
     /// </summary>
     internal class Parser
     {
@@ -19,36 +19,26 @@ namespace BitPatch.DialogLang
             _current = new Token(TokenType.EndOfFile, string.Empty, 0, 0);
             _next = new Token(TokenType.EndOfFile, string.Empty, 0, 0);
 
-            // Initialize first two tokens
+            // Initialize first two tokens.
             MoveNext();
             MoveNext();
         }
 
         /// <summary>
-        /// Parses tokens and yields statements one by one (streaming)
+        /// Parses tokens and yields statements one by one (streaming).
         /// </summary>
         public IEnumerable<Ast.Statement> Parse()
         {
-            // Skip leading newlines
             SkipNewlines();
 
             while (!_current.IsEndOfFile())
             {
                 yield return ParseStatement();
-
-                // Expect newline or EOF after statement
-                if (!_current.IsEndOfStatement())
-                {
-                    throw new InvalidSyntaxException(_current.Location);
-                }
-
-                // Skip newlines after statement
-                SkipNewlines();
             }
         }
 
         /// <summary>
-        /// Parses a single statement
+        /// Parses a single statement.
         /// </summary>
         private Ast.Statement ParseStatement()
         {
@@ -56,17 +46,13 @@ namespace BitPatch.DialogLang
             {
                 TokenType.Identifier => ParseStatementFromIdentifier(),
                 TokenType.Output => ParseOutput(),
+                TokenType.Indent => ParseBlock(),
                 _ => throw new InvalidSyntaxException(_current.Location)
             };
         }
 
         private Ast.Statement ParseStatementFromIdentifier()
         {
-            if (_current.Type != TokenType.Identifier)
-            {
-                throw new InvalidOperationException($"Expected identifier token, but current token type is {_current.Type}");
-            }
-
             return _next.Type switch
             {
                 TokenType.Assign => ParseAssignment(),
@@ -75,7 +61,7 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Parses an assignment statement: identifier = expression
+        /// Parses an assignment statement: identifier = expression.
         /// </summary>
         private Ast.Assign ParseAssignment()
         {
@@ -83,22 +69,45 @@ namespace BitPatch.DialogLang
             var startLocation = identifier.Location;
 
             Consume(TokenType.Assign); // consume '='
-
             var expression = ParseExpression();
+            Consume(TokenType.Newline); // expect end of statement
+
             return new Ast.Assign(identifier, expression, startLocation | expression.Location);
         }
 
         /// <summary>
-        /// Parses an output statement: << expression
+        /// Parses an output statement: << expression.
         /// </summary>
         private Ast.Output ParseOutput()
         {
             var startLocation = _current.Location;
 
             Consume(TokenType.Output); // consume '<<'
-
             var expression = ParseExpression();
+            Consume(TokenType.Newline); // expect end of statement
+
             return new Ast.Output(expression, startLocation | expression.Location);
+        }
+
+        /// <summary>
+        /// Parses a block of indented statements.
+        /// </summary>
+        private Ast.Block ParseBlock()
+        {
+            var startLocation = _current.Location;
+
+            Consume(TokenType.Indent); // expect start of block
+
+            var statements = new List<Ast.Statement>();
+
+            while (_current.Type is not TokenType.Dedent)
+            {
+                statements.Add(ParseStatement());
+            }
+
+            Consume(TokenType.Dedent); // expect end of block
+
+            return new Ast.Block(statements, startLocation);
         }
 
         private Ast.Identifier ParseIdentifier()
@@ -182,7 +191,7 @@ namespace BitPatch.DialogLang
                 MoveNext(); // consume comparison operator
                 var right = ParseNotExpression();
                 var position = left.Location | right.Location;
-                
+
                 left = opType switch
                 {
                     TokenType.GreaterThan => new Ast.GreaterThanOp(left, right, position),
@@ -203,8 +212,8 @@ namespace BitPatch.DialogLang
         /// </summary>
         private static bool IsComparisonOperator(TokenType type)
         {
-            return type is TokenType.GreaterThan or TokenType.LessThan 
-                       or TokenType.GreaterOrEqual or TokenType.LessOrEqual 
+            return type is TokenType.GreaterThan or TokenType.LessThan
+                       or TokenType.GreaterOrEqual or TokenType.LessOrEqual
                        or TokenType.Equal or TokenType.NotEqual;
         }
 
@@ -221,7 +230,7 @@ namespace BitPatch.DialogLang
                 MoveNext(); // consume operator
                 var right = ParseMultiplicativeExpression();
                 var location = left.Location | right.Location;
-                
+
                 left = opType switch
                 {
                     TokenType.Plus => new Ast.AddOp(left, right, location),
@@ -246,7 +255,7 @@ namespace BitPatch.DialogLang
                 MoveNext(); // consume operator
                 var right = ParseUnaryExpression();
                 var location = left.Location | right.Location;
-                
+
                 left = opType switch
                 {
                     TokenType.Multiply => new Ast.MulOp(left, right, location),
@@ -352,12 +361,12 @@ namespace BitPatch.DialogLang
         /// Consumes a token of the expected type and moves to the next token
         /// </summary>
         /// <param name="expectedType">The expected token type</param>
-        /// <exception cref="InvalidOperationException">Thrown when current token doesn't match expected type</exception>
+        /// <exception cref="InvalidSyntaxException">Thrown when current token doesn't match expected type</exception>
         private void Consume(TokenType expectedType)
         {
             if (_current.Type != expectedType)
             {
-                throw new InvalidOperationException($"Expected {expectedType} token, but current token type is {_current.Type}");
+                throw new InvalidSyntaxException(_current.Location);
             }
 
             MoveNext();
