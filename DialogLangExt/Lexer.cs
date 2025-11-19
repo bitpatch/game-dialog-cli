@@ -6,15 +6,49 @@ using System.Text;
 namespace BitPatch.DialogLang
 {
     /// <summary>
-    /// Lexical analyzer that converts source code into tokens
+    /// Lexical analyzer that converts source code into tokens.
     /// </summary>
     internal class Lexer
     {
+        /// <summary>
+        /// The reader to read source code from.
+        /// </summary>
         private readonly TextReader _reader;
+
+        /// <summary>
+        /// The buffer to accumulate characters for the current token.
+        /// </summary>
         private readonly StringBuilder _buffer;
+
+        /// <summary>
+        /// The current character being processed. If -1, end of file is reached.
+        /// </summary>
         private int _current;
+
+        /// <summary>
+        /// The current line number (1-based).
+        /// </summary>
         private int _line;
+
+        /// <summary>
+        /// The current column number (1-based).
+        /// </summary>
         private int _column;
+
+        /// <summary>
+        /// Stack to keep track of indentation levels.
+        /// </summary>
+        private readonly Stack<int> _indents;
+
+        /// <summary>
+        /// Defines the indentation style: ' ' for spaces, '\t' for tabs, or '\0' if undefined.
+        /// </summary>  
+        private char _indentStyle;
+
+        /// <summary>
+        /// Indicates if we are at the start of a new line (to process indentation).
+        /// </summary>
+        private bool _atLineStart;
 
         public Lexer(TextReader reader)
         {
@@ -23,37 +57,144 @@ namespace BitPatch.DialogLang
             _line = 1;
             _column = 1;
             _current = _reader.Read();
+            _indents = new Stack<int>();
+            _indents.Push(0);
+            _indentStyle = '\0';
+            _atLineStart = true;
         }
 
         /// <summary>
-        /// Tokenizes the source code one token at a time (streaming)
+        /// Tokenizes the source code one token at a time (streaming).
         /// </summary>
         public IEnumerable<Token> Tokenize()
         {
-            while (_current != -1)
+            while (_current.IsChar())
             {
-                yield return ReadNextToken();
+                if (_atLineStart)
+                {
+                    var (tokenType, count) = ReadIndentation();
+
+                    var identToken = tokenType switch
+                    {
+                        TokenType.Indent => Token.Indent(_line, _column),
+                        TokenType.Dedent => Token.Dedent(_line, _column),
+                        _ => throw new InvalidOperationException("Unexpected token type from ReadIndentation")
+                    };
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        yield return identToken;
+                    }
+
+                    _atLineStart = false;
+                }
+
+                SkipWhitespace();
+
+                if (!_current.IsChar())
+                {
+                    break;
+                }
+
+                yield return ReadFromCharacter((char)_current);
             }
 
-            yield return new Token(TokenType.EndOfFile, string.Empty, _line, _column);
+            yield return Token.NewLine(_line, _column);
+
+            // Generate Dedent tokens for all remaining indentation levels
+            while (_indents.Count > 1)
+            {
+                _indents.Pop();
+                yield return Token.Dedent(_line, _column);
+            }
+
+            yield return Token.EndOfFile(_line, _column);
         }
 
         /// <summary>
-        /// Gets the next token from the source code
+        /// Reads the indentation level and returns Indent/Dedent tokens as needed.
         /// </summary>
-        private Token ReadNextToken()
+        private (TokenType tokenType, int count) ReadIndentation()
         {
-            SkipWhitespace();
+            int identLevel = ReadIndentationLevel();
+            var currentLevel = _indents.Peek();
 
-            if (_current == -1)
+            if (identLevel > currentLevel)
             {
-                return new Token(TokenType.EndOfFile, string.Empty, _line, _column);
+                _indents.Push(identLevel);
+                return (TokenType.Indent, 1);
             }
 
-            return (char)_current switch
+            var count = 0;
+
+            while (identLevel < currentLevel)
             {
-                // Newline (statement terminator) - skip consecutive newlines
-                '\n' => ReadNewline(),
+                _indents.Pop();
+                currentLevel = _indents.Peek();
+                count++;
+            }
+
+            if (identLevel != currentLevel)
+            {
+                throw new InvalidSyntaxException("Inconsistent indentation", _line, _column);
+            }
+
+            return (TokenType.Dedent, count);
+        }
+
+        /// <summary>
+        /// Reads the indentation level (number of spaces/tabs) at the start of a line.
+        /// </summary>
+        private int ReadIndentationLevel()
+        {
+            if (!_atLineStart)
+            {
+                throw new InvalidOperationException($"{nameof(ReadIndentationLevel)} called when not at the start of a line");
+            }
+
+            int identLevel = 0;
+
+            while (_current is not -1)
+            {
+                var ch = (char)_current;
+
+                if (ch.IsNewLine())
+                {
+                    identLevel = 0;
+                }
+                else if (ch is ' ' or '\t')
+                {
+                    if (_indentStyle is '\0')
+                    {
+                        _indentStyle = ch;
+                    }
+                    else if (ch != _indentStyle)
+                    {
+                        throw new InvalidSyntaxException("Inconsistent use of tabs and spaces for indentation", _line, _column);
+                    }
+
+                    identLevel++;
+                }
+                else
+                {
+                    break;
+                }
+
+                MoveNextChar();
+            }
+
+            return identLevel;
+        }
+
+        /// <summary>
+        /// Reads a token starting from the given character.
+        /// </summary>
+        private Token ReadFromCharacter(char value)
+        {
+            return value switch
+            {
+                // Newline (statement terminator)
+                '\n' or '\r' or '\u2028' or '\u2029' or '\u0085' => ReadNewline(),
 
                 // String literal
                 '"' => ReadString(),
@@ -87,124 +228,111 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Reads operators starting with '<': '<<', '<=', or '<'
+        /// Reads operators starting with '<': '<<', '<=', or '<'.
         /// </summary>
         private Token ReadFromLessThanSign()
         {
             var line = _line;
-            var startColumn = _column;
-            
+            var initial = _column;
+
             MoveNextChar(); // consume first '<'
-            
-            if (_current == '<')
+
+            if (_current is '<')
             {
                 MoveNextChar(); // consume second '<'
-                var position = new Location(line, startColumn, _column);
-                return new Token(TokenType.Output, "<<", position);
+                return new Token(TokenType.Output, "<<", line, initial, _column);
             }
-            
-            if (_current == '=')
+
+            if (_current is '=')
             {
                 MoveNextChar(); // consume '='
-                var position = new Location(line, startColumn, _column);
-                return new Token(TokenType.LessOrEqual, "<=", position);
+                return new Token(TokenType.LessOrEqual, "<=", line, initial, _column);
             }
-            
-            var finalPosition = new Location(line, startColumn, _column);
-            return new Token(TokenType.LessThan, "<", finalPosition);
+
+            return new Token(TokenType.LessThan, "<", line, initial, _column);
         }
-        
+
         /// <summary>
-        /// Reads operators starting with '>': '>=', or '>'
+        /// Reads operators starting with '>': '>=', or '>'.
         /// </summary>
         private Token ReadFromGreaterThanSign()
         {
             var line = _line;
-            var startColumn = _column;
-            
+            var initial = _column;
+
             MoveNextChar(); // consume '>'
-            
-            if (_current == '=')
+
+            if (_current is '=')
             {
                 MoveNextChar(); // consume '='
-                var position = new Location(line, startColumn, _column);
-                return new Token(TokenType.GreaterOrEqual, ">=", position);
+                return new Token(TokenType.GreaterOrEqual, ">=", line, initial, _column);
             }
-            
-            var finalPosition = new Location(line, startColumn, _column);
-            return new Token(TokenType.GreaterThan, ">", finalPosition);
+
+            return new Token(TokenType.GreaterThan, ">", line, initial, _column);
         }
-        
+
         /// <summary>
-        /// Reads operators starting with '=': '==', or '='
+        /// Reads operators starting with '=': '==', or '='.
         /// </summary>
         private Token ReadFromEqualsSign()
         {
             var line = _line;
-            var startColumn = _column;
-            
+            var initial = _column;
+
             MoveNextChar(); // consume first '='
-            
-            if (_current == '=')
+
+            if (_current is '=')
             {
                 MoveNextChar(); // consume second '='
-                var position = new Location(line, startColumn, _column);
-                return new Token(TokenType.Equal, "==", position);
+                return new Token(TokenType.Equal, "==", line, initial, _column);
             }
-            
-            var finalPosition = new Location(line, startColumn, _column);
-            return new Token(TokenType.Assign, "=", finalPosition);
+
+            return new Token(TokenType.Assign, "=", line, initial, _column);
         }
-        
+
         /// <summary>
-        /// Reads operators starting with '!': '!='
+        /// Reads operators starting with '!': '!='.
         /// </summary>
         private Token ReadFromExclamationMark()
         {
             var line = _line;
-            var startColumn = _column;
-            
+            var initial = _column;
+
             MoveNextChar(); // consume '!'
-            
-            if (_current == '=')
+
+            if (_current is '=')
             {
                 MoveNextChar(); // consume '='
-                var position = new Location(line, startColumn, _column);
-                return new Token(TokenType.NotEqual, "!=", position);
+                return new Token(TokenType.NotEqual, "!=", line, initial, _column);
             }
-            
-            throw new InvalidSyntaxException("Unexpected symbol '!'", line, startColumn);
+
+            throw new InvalidSyntaxException("Unexpected symbol '!'", line, initial);
         }
 
         /// <summary>
-        /// Creates a single-character token and advances position
+        /// Creates a single-character token and advances position.
         /// </summary>
         private Token ReadSingleCharToken(TokenType type, string value)
         {
             var line = _line;
-            var startColumn = _column;
+            var initial = _column;
             MoveNextChar();
-            var position = new Location(line, startColumn, _column);
-            return new Token(type, value, position);
+            return new Token(type, value, line, initial, _column);
         }
 
         /// <summary>
-        /// Reads an integer number from the source
+        /// Reads an integer number from the source.
         /// </summary>
         private Token ReadNumber()
         {
             _buffer.Clear();
 
             var line = _line;
-            var startColumn = _column;
+            var initial = _column;
             bool isFloat = false;
 
             // Read integer part
-            while (_current != -1 && char.IsDigit((char)_current))
-            {
-                _buffer.Append((char)_current);
-                MoveNextChar();
-            }
+            ReadDigits();
 
             // Check for decimal point
             if (_current == '.')
@@ -214,16 +342,20 @@ namespace BitPatch.DialogLang
                 MoveNextChar();
 
                 // Read fractional part
-                while (_current != -1 && char.IsDigit((char)_current))
+                ReadDigits();
+            }
+
+            var tokenType = isFloat ? TokenType.Float : TokenType.Integer;
+            return new Token(tokenType, _buffer.ToString(), line, initial, _column);
+
+            void ReadDigits()
+            {
+                while (_current.IsDigit())
                 {
                     _buffer.Append((char)_current);
                     MoveNextChar();
                 }
             }
-
-            var position = new Location(line, startColumn, _column);
-            var tokenType = isFloat ? TokenType.Float : TokenType.Integer;
-            return new Token(tokenType, _buffer.ToString(), position);
         }
 
         /// <summary>
@@ -233,27 +365,27 @@ namespace BitPatch.DialogLang
         {
             _buffer.Clear();
             var line = _line;
-            var startColumn = _column;
+            var initial = _column;
 
-            while (_current != -1 && (char.IsLetterOrDigit((char)_current) || (char)_current == '_'))
+            while (_current.IsIdentifierChar())
             {
                 _buffer.Append((char)_current);
                 MoveNextChar();
             }
 
-            var position = new Location(line, startColumn, _column);
+            var location = new Location(line, initial, _column);
             var value = _buffer.ToString();
 
             // Check for keywords
             return value switch
             {
-                "true" => new Token(TokenType.True, "true", position),
-                "false" => new Token(TokenType.False, "false", position),
-                "and" => new Token(TokenType.And, "and", position),
-                "or" => new Token(TokenType.Or, "or", position),
-                "not" => new Token(TokenType.Not, "not", position),
-                "xor" => new Token(TokenType.Xor, "xor", position),
-                _ => new Token(TokenType.Identifier, value, position)
+                "true" => new Token(TokenType.True, "true", location),
+                "false" => new Token(TokenType.False, "false", location),
+                "and" => new Token(TokenType.And, "and", location),
+                "or" => new Token(TokenType.Or, "or", location),
+                "not" => new Token(TokenType.Not, "not", location),
+                "xor" => new Token(TokenType.Xor, "xor", location),
+                _ => new Token(TokenType.Identifier, value, location)
             };
         }
 
@@ -264,7 +396,7 @@ namespace BitPatch.DialogLang
         {
             _buffer.Clear();
             var line = _line;
-            var startColumn = _column;
+            var initial = _column;
 
             // Skip opening quote
             MoveNextChar();
@@ -294,7 +426,7 @@ namespace BitPatch.DialogLang
 
                     MoveNextChar();
                 }
-                else if ((char)_current == '\n')
+                else if (_current.IsNewLine())
                 {
                     throw new InvalidSyntaxException("String is not closed with a quote", _line, _column);
                 }
@@ -313,8 +445,7 @@ namespace BitPatch.DialogLang
             // Skip closing quote
             MoveNextChar();
 
-            var position = new Location(line, startColumn, _column);
-            return new Token(TokenType.String, _buffer.ToString(), position);
+            return new Token(TokenType.String, _buffer.ToString(), line, initial, _column);
         }
 
         /// <summary>
@@ -322,30 +453,15 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Token ReadNewline()
         {
-            var line = _line;
-            var startColumn = _column;
-
-            // Skip all consecutive newlines and whitespace between them
-            while (_current != -1)
+            if (!_current.IsNewLine())
             {
-                if ((char)_current == '\n')
-                {
-                    MoveNextChar();
-                }
-                else if (char.IsWhiteSpace((char)_current))
-                {
-                    // Skip whitespace between newlines
-                    MoveNextChar();
-                }
-                else
-                {
-                    // Stop at non-whitespace character
-                    break;
-                }
+                throw new InvalidOperationException("End of file reached while trying to read newline");
             }
 
-            var position = new Location(line, startColumn, _column);
-            return new Token(TokenType.Newline, "\n", position);
+            MoveNextChar();
+
+            _atLineStart = true; // Next token will handle indentation
+            return Token.NewLine(_line, _column);
         }
 
         /// <summary>
@@ -353,16 +469,17 @@ namespace BitPatch.DialogLang
         /// </summary>
         private void MoveNextChar()
         {
-            if ((char)_current == '\n')
+            if (_current.IsNewLine())
             {
                 _line++;
                 _column = 1;
+                _atLineStart = true;
             }
             else
             {
                 _column++;
             }
-            
+
             _current = _reader.Read();
         }
 
@@ -371,7 +488,7 @@ namespace BitPatch.DialogLang
         /// </summary>
         private void SkipWhitespace()
         {
-            while (_current != -1 && char.IsWhiteSpace((char)_current) && (char)_current != '\n')
+            while (_current.IsWhiteSpace())
             {
                 MoveNextChar();
             }
