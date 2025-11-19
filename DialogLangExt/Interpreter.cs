@@ -95,7 +95,8 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(andOp.Left);
             var right = EvaluateExpression(andOp.Right);
 
-            return (left, right) switch {
+            return (left, right) switch
+            {
                 (Boolean l, Boolean r) => l.Value && r.Value,
                 (Boolean l, not Boolean) => throw Exception(andOp.Right.Location),
                 (not Boolean, Boolean r) => throw Exception(andOp.Left.Location),
@@ -116,7 +117,8 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(orOp.Left);
             var right = EvaluateExpression(orOp.Right);
 
-            return (left, right) switch {
+            return (left, right) switch
+            {
                 (Boolean l, Boolean r) => l.Value || r.Value,
                 (Boolean l, not Boolean) => throw Exception(orOp.Right.Location),
                 (not Boolean, Boolean r) => throw Exception(orOp.Left.Location),
@@ -137,7 +139,8 @@ namespace BitPatch.DialogLang
             var left = EvaluateExpression(xorOp.Left);
             var right = EvaluateExpression(xorOp.Right);
 
-            return (left, right) switch {
+            return (left, right) switch
+            {
                 (Boolean l, Boolean r) => l.Value ^ r.Value,
                 (Boolean l, not Boolean) => throw Exception(xorOp.Right.Location),
                 (not Boolean, Boolean r) => throw Exception(xorOp.Left.Location),
@@ -239,12 +242,16 @@ namespace BitPatch.DialogLang
             return (left, right) switch
             {
                 (Integer l, Integer r) => new Integer(l.Value + r.Value),
-                (Float l, Float r) => new Float(l.Value + r.Value),
-                (Integer l, Float r) => new Float(l.Value + r.Value),
-                (Float l, Integer r) => new Float(l.Value + r.Value),
-                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Location),
-                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Location)
+                (Number l, Number r) => new Float(l.FloatValue + r.FloatValue),
+                (Number, not Number) => throw Exception(op.Right.Location),
+                (not Number, Number) => throw Exception(op.Left.Location),
+                _ => throw Exception(op.Left.Location | op.Right.Location)
             };
+
+            ScriptException Exception(Location location)
+            {
+                return new ScriptException($"Cannot add {left.GetType().Name} and {right.GetType().Name}", location);
+            }
         }
 
         /// <summary>
@@ -258,12 +265,16 @@ namespace BitPatch.DialogLang
             return (left, right) switch
             {
                 (Integer l, Integer r) => new Integer(l.Value - r.Value),
-                (Float l, Float r) => new Float(l.Value - r.Value),
-                (Integer l, Float r) => new Float(l.Value - r.Value),
-                (Float l, Integer r) => new Float(l.Value - r.Value),
-                (Number, _) => throw new TypeMismatchException(typeof(Number), right, op.Right.Location),
-                _ => throw new TypeMismatchException(typeof(Number), left, op.Left.Location)
+                (Number l, Number r) => new Float(l.FloatValue - r.FloatValue),
+                (Number, not Number) => throw Exception(op.Right.Location),
+                (not Number, Number) => throw Exception(op.Left.Location),
+                _ => throw Exception(op.Left.Location | op.Right.Location)
             };
+
+            ScriptException Exception(Location location)
+            {
+                return new ScriptException($"Cannot subtract {right.GetType().Name} from {left.GetType().Name}", location);
+            }
         }
 
         /// <summary>
@@ -339,19 +350,17 @@ namespace BitPatch.DialogLang
             return (leftValue, rightValue) switch
             {
                 (Integer l, Integer r) => l.Value - r.Value,
-                (Float l, Float r) => l.Value - r.Value,
-                (Integer l, Float r) => l.Value - r.Value,
-                (Float l, Integer r) => l.Value - r.Value,
-                (not Number, Number) => throw CompareException(leftValue, rightValue, left.Location),
-                (Number, not Number) => throw CompareException(leftValue, rightValue, right.Location),
-                _ => throw CompareException(leftValue, rightValue, left.Location | right.Location)
-                
-            };
-        }
+                (Number l, Number r) => l.FloatValue - r.FloatValue,
+                (not Number, Number) => throw Exception(left.Location),
+                (Number, not Number) => throw Exception(right.Location),
+                _ => throw Exception(left.Location | right.Location)
 
-        ScriptException CompareException(RuntimeValue left, RuntimeValue right, Location location)
-        {
-            return new ScriptException($"Cannot compare {left.GetType().Name} and {right.GetType().Name}", location);
+            };
+
+            ScriptException Exception(Location location)
+            {
+                return new ScriptException($"Cannot compare {left.GetType().Name} and {right.GetType().Name}", location);
+            }
         }
 
         /// <summary>

@@ -91,6 +91,6 @@ public class StringConcatenationTests
     public void SubtractionDoesNotWorkWithStrings()
     {
         // Subtraction is only for numbers, not strings
-        Assert.Throws<TypeMismatchException>(() => Utils.Execute("<< \"test\" - 5"));
+        Assert.Throws<ScriptException>(() => Utils.Execute("<< \"test\" - 5"));
     }
 }
