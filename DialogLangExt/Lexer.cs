@@ -89,7 +89,7 @@ namespace BitPatch.DialogLang
                     _atLineStart = false;
                 }
 
-                SkipWhitespace();
+                SkipEmptyChars();
 
                 if (!_current.IsChar())
                 {
@@ -101,7 +101,7 @@ namespace BitPatch.DialogLang
 
             yield return Token.NewLine(_line, _column);
 
-            // Generate Dedent tokens for all remaining indentation levels
+            // Generate Dedent tokens for all remaining indentation levels.
             while (_indents.Count > 1)
             {
                 _indents.Pop();
@@ -154,9 +154,15 @@ namespace BitPatch.DialogLang
 
             int identLevel = 0;
 
-            while (_current is not -1)
+            while (_current.IsChar())
             {
                 var ch = (char)_current;
+
+                if (ch is '#')
+                {
+                    SkipComment();
+                    continue;
+                }
 
                 if (ch.IsNewLine())
                 {
@@ -359,7 +365,7 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Reads an identifier or keyword (variable name, true, false)
+        /// Reads an identifier or keyword (variable name, true, false).
         /// </summary>
         private Token ReadIdentifierOrKeyword()
         {
@@ -390,7 +396,7 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Reads a string literal from the source (enclosed in double quotes)
+        /// Reads a string literal from the source (enclosed in double quotes).
         /// </summary>
         private Token ReadString()
         {
@@ -449,7 +455,7 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Reads a newline token, skipping consecutive newlines and whitespace between them
+        /// Reads a newline token.
         /// </summary>
         private Token ReadNewline()
         {
@@ -465,7 +471,25 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Advances to the next character
+        /// Skips comment characters until the end of the line.
+        /// </summary>
+        private void SkipComment()
+        {
+            if (_current is not '#')
+            {
+                return;
+            }
+
+            MoveNextChar();
+
+            while (!_current.IsNewLine())
+            {
+                MoveNextChar();
+            }            
+        }
+
+        /// <summary>
+        /// Advances to the next character.
         /// </summary>
         private void MoveNextChar()
         {
@@ -484,14 +508,16 @@ namespace BitPatch.DialogLang
         }
 
         /// <summary>
-        /// Skips whitespace characters except newlines
+        /// Skips whitespace characters except newlines and comments.
         /// </summary>
-        private void SkipWhitespace()
+        private void SkipEmptyChars()
         {
             while (_current.IsWhiteSpace())
             {
                 MoveNextChar();
             }
+
+            SkipComment();
         }
     }
 }

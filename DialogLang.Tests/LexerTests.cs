@@ -2,7 +2,7 @@ using BitPatch.DialogLang;
 
 namespace DialogLang.Tests;
 
-public class Lexer
+public class LexerTests
 {
     private static List<Token> Tokenize(string source)
     {
@@ -16,9 +16,13 @@ public class Lexer
     {
         var source = """
         x = 1
-            y = 2
+        # Some text
+            y = 2 #Comments
         << x
+           # Comment
            << y
+        # Comment
+          # Comment
 
             z = 3
         """;

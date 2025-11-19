@@ -1,8 +1,10 @@
 << "Hi!"
     << "How are you?"
 a = 10
-b = 20
+# Some comments
+b = 20 # Also comments
     << a
+# Comments
         << b
     c = "test"
 << c
