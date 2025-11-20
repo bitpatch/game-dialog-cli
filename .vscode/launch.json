@@ -6,9 +6,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Dialog/bin/Debug/net10.0/dialog.dll",
+            "program": "${workspaceFolder}/GDialog/bin/Debug/net10.0/gdialog.dll",
             "args": ["script.gds"],
-            "cwd": "${workspaceFolder}/Dialog",
+            "cwd": "${workspaceFolder}/GDialog",
             "console": "integratedTerminal",
             "stopAtEntry": false
         }

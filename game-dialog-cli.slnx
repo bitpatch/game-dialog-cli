@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="Dialog/Dialog.csproj" />
+  <Project Path="GDialog/GDialog.csproj" />
   <Project Path="DialogLang/DialogLang.csproj" />
   <Project Path="DialogLang.Tests/DialogLang.Tests.csproj" />
 </Solution>
