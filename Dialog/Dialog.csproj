@@ -11,11 +11,11 @@
     <ToolCommandName>gdialog</ToolCommandName>
     <PackageId>gdialog</PackageId>
     <Version>0.1.0</Version>
-    <Authors>Denis Kondratev</Authors>
+    <Authors>Bit Patch</Authors>
     <Description>Game Dialog Script Tool</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/denis-kondratev/game-dialog-cli</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/denis-kondratev/game-dialog-cli</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bitpatch/game-dialog-cli</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/bitpatch/game-dialog-cli</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
