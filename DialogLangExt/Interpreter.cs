@@ -4,24 +4,26 @@ using System.Collections.Generic;
 namespace BitPatch.DialogLang
 {
     /// <summary>
-    /// Interpreter that executes the AST
+    /// Interpreter that executes the AST.
     /// </summary>
     internal class Interpreter
     {
         private readonly Dictionary<string, RuntimeValue> _variables;
+        private readonly int MaxLoopIterations;
 
-        public Interpreter()
+        public Interpreter(int maxLoopIterations = 100)
         {
+            MaxLoopIterations = maxLoopIterations;
             _variables = new Dictionary<string, RuntimeValue>();
         }
 
         /// <summary>
-        /// Gets all variables in the current scope
+        /// Gets all variables in the current scope.
         /// </summary>
         public IReadOnlyDictionary<string, RuntimeValue> Variables => _variables;
 
         /// <summary>
-        /// Executes statements one by one as they arrive (streaming), yielding output values
+        /// Executes statements one by one as they arrive (streaming), yielding output values.
         /// </summary>
         public IEnumerable<object> Execute(IEnumerable<Ast.Statement> statements)
         {
@@ -42,6 +44,13 @@ namespace BitPatch.DialogLang
                         break;
                     case Ast.Block block:
                         blockStack.PushStatements(block.Statements);
+                        break;
+                    case Ast.While whileLoop:
+                        if (EvaluateCondition(whileLoop.Condition).Value)
+                        {
+                            blockStack.Push(whileLoop); // Re-push the while loop for the next iteration
+                            blockStack.PushStatements(whileLoop.Body.Statements);
+                        }
                         break;
                     default:
                         throw new NotSupportedException($"Unsupported statement type: {statement.GetType().Name}");
@@ -422,6 +431,18 @@ namespace BitPatch.DialogLang
             }
 
             throw new ScriptException($"Variable '{variable.Name}' is not defined", variable.Location);
+        }
+
+        private Boolean EvaluateCondition(Ast.Expression expression)
+        {
+            var value = EvaluateExpression(expression);
+
+            if (value is Boolean boolValue)
+            {
+                return boolValue;
+            }
+
+            throw new ScriptException($"Expected boolean expression, got {value.GetType().Name}", expression.Location);
         }
 
         /// <summary>

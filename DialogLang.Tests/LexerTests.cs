@@ -46,5 +46,31 @@ public class LexerTests
 
         Assert.Equal(expected, result.Select(t => t.Type));
     }
+
+    [Fact]
+    public void WhileLoop()
+    {
+        var source = """
+        x = 3
+        while x > 0
+            << x
+            x = x - 1
+        """;
+
+        var result = Tokenize(source);
+
+        var expected = new[]
+        {
+            TokenType.Identifier, TokenType.Assign, TokenType.Integer, TokenType.Newline,
+            TokenType.While, TokenType.Identifier, TokenType.GreaterThan, TokenType.Integer, TokenType.Newline,
+            TokenType.Indent,
+            TokenType.Output, TokenType.Identifier, TokenType.Newline,
+            TokenType.Identifier, TokenType.Assign, TokenType.Identifier, TokenType.Minus, TokenType.Integer, TokenType.Newline,
+            TokenType.Dedent,
+            TokenType.EndOfFile
+        };
+        
+        Assert.Equal(expected, result.Select(t => t.Type));
+    }
 }
 

@@ -47,6 +47,7 @@ namespace BitPatch.DialogLang
                 TokenType.Identifier => ParseStatementFromIdentifier(),
                 TokenType.Output => ParseOutput(),
                 TokenType.Indent => ParseBlock(),
+                TokenType.While => ParseWhile(),
                 _ => throw new InvalidSyntaxException(_current.Location)
             };
         }
@@ -108,6 +109,28 @@ namespace BitPatch.DialogLang
             Consume(TokenType.Dedent); // expect end of block
 
             return new Ast.Block(statements, startLocation);
+        }
+
+        /// <summary>
+        /// Parses a while loop.
+        /// </summary>
+        private Ast.While ParseWhile()
+        {
+            var location = _current.Location;
+
+            Consume(TokenType.While); // consume 'while'
+            var condition = ParseExpression();
+            Consume(TokenType.Newline); // expect newline after condition
+
+            // Expect an indented block (body cannot be empty)
+            if (_current.Type is not TokenType.Indent)
+            {
+                throw new InvalidSyntaxException("While loop body cannot be empty", location);
+            }
+
+            var body = ParseBlock();
+
+            return new Ast.While(condition, body, location);
         }
 
         private Ast.Identifier ParseIdentifier()

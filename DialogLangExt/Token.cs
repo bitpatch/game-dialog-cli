@@ -26,6 +26,11 @@ namespace BitPatch.DialogLang
         Divide,         // /
         Modulo,         // %
         
+        // Control flow
+        While,          // while
+        Break,          // break (reserved)
+        Continue,       // continue (reserved)
+        
         // Comparison operators
         GreaterThan,    // >
         LessThan,       // <

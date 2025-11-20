@@ -1,13 +1,9 @@
-<< "Hi!"
-    << "How are you?"
-a = 10
-# Some comments
-b = 20 # Also comments
-    << a
-# Comments
-        << b
-    c = "test"
-<< c
+<< "How are you?"
+a = 5
+
+while a > 0
+    << "a: " + a
+    a = a - 1
 
 x = 42.0
 y = true
