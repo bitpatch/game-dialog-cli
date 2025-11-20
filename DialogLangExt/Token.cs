@@ -30,6 +30,8 @@ namespace BitPatch.DialogLang
         While,          // while
         Break,          // break (reserved)
         Continue,       // continue (reserved)
+        If,             // if
+        Else,           // else
         
         // Comparison operators
         GreaterThan,    // >

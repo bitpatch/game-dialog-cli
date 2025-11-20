@@ -58,19 +58,22 @@ namespace BitPatch.DialogLang
                         ExecuteAssignment(assign);
                         break;
                     case Ast.Block block:
-                        blockStack.PushStatements(block.Statements);
+                        block.PushTo(blockStack);
                         break;
                     case Ast.While whileLoop:
                         if (EvaluateCondition(whileLoop.Condition).Value)
                         {
                             loops.Get(whileLoop.Location).Increment().Assert(MaxLoopIterations);
-                            blockStack.Push(whileLoop); // Re-push the while loop for the next iteration
-                            blockStack.PushStatements(whileLoop.Body.Statements);
+                            whileLoop.PushTo(blockStack); // Re-push the while loop for the next iteration
+                            whileLoop.Body.PushTo(blockStack);
                         }
                         else
                         {
                             loops.Clear(whileLoop.Location);
                         }
+                        break;
+                    case Ast.If ifStatement:
+                        EvaluateIfStatement(ifStatement)?.PushTo(blockStack);
                         break;
                     default:
                         throw new NotSupportedException($"Unsupported statement type: {statement.GetType().Name}");
@@ -94,6 +97,33 @@ namespace BitPatch.DialogLang
         private void ExecuteAssignment(Ast.Assign node)
         {
             _variables[node.Identifier.Name] = EvaluateExpression(node.Expression);
+        }
+
+        /// <summary>
+        /// Evaluates the condition of an <c>if</c> statement and returns the block
+        /// associated with the first condition that evaluates to true.
+        /// </summary>
+        /// <param name="statement">The <c>if</c> statement to evaluate.</param>
+        /// <returns>
+        /// The block corresponding to the first true condition, or the <c>else</c> block
+        /// if no conditions are true, or <c>null</c> if no block is available.
+        /// </returns>
+        private Ast.Block? EvaluateIfStatement(Ast.If statement)
+        {
+            if (EvaluateCondition(statement.IfBranch.Condition).Value)
+            {
+                return statement.IfBranch.Block;
+            }
+
+            foreach (var elseIfBranch in statement.ElseIfBranches)
+            {
+                if (EvaluateCondition(elseIfBranch.Condition).Value)
+                {
+                    return elseIfBranch.Block;
+                }
+            }
+
+            return statement.ElseBlock;
         }
 
         /// <summary>
@@ -518,7 +548,7 @@ namespace BitPatch.DialogLang
 
             throw new ScriptException($"Variable '{variable.Name}' is not defined", variable.Location);
         }
-        
+
         /// <summary>
         /// Evaluates a condition expression and returns its boolean value.
         /// </summary>

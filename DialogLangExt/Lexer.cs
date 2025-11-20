@@ -394,6 +394,8 @@ namespace BitPatch.DialogLang
                 "while" => new Token(TokenType.While, "while", location),
                 "break" => new Token(TokenType.Break, "break", location),
                 "continue" => new Token(TokenType.Continue, "continue", location),
+                "if" => new Token(TokenType.If, "if", location),
+                "else" => new Token(TokenType.Else, "else", location),
                 _ => new Token(TokenType.Identifier, value, location)
             };
         }

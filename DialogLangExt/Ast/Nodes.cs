@@ -173,4 +173,14 @@ namespace BitPatch.DialogLang.Ast
     /// Node representing a while loop statement.
     /// </summary>
     internal sealed record While(Expression Condition, Block Body, Location Location) : Statement(Location);
+
+    /// <summary>
+    /// Represents a condition and the block of code that should be executed when this condition is true.
+    /// </summary>
+    internal sealed record ConditionalBlock(Expression Condition, Block Block, Location Location) : Node(Location);
+
+    /// <summary>
+    /// Node representing an if-else statement with optional else if branches.
+    /// </summary>
+    internal sealed record If(ConditionalBlock IfBranch, IReadOnlyList<ConditionalBlock> ElseIfBranches, Block? ElseBlock, Location Location) : Statement(Location);
 }

@@ -48,6 +48,7 @@ namespace BitPatch.DialogLang
                 TokenType.Output => ParseOutput(),
                 TokenType.Indent => ParseBlock(),
                 TokenType.While => ParseWhile(),
+                TokenType.If => ParseIf(),
                 _ => throw new InvalidSyntaxException(_current.Location)
             };
         }
@@ -132,6 +133,69 @@ namespace BitPatch.DialogLang
             var body = ParseBlock();
 
             return new Ast.While(condition.AssertBoolean(), body, startLocation | condition.Location);
+        }
+
+        /// <summary>
+        /// Parses an if-else statement with optional else if branches.
+        /// </summary>
+        /// <returns>The parsed if statement.</returns>
+        /// <exception cref="InvalidSyntaxException">Thrown when then/else blocks are missing.</exception>
+        private Ast.If ParseIf()
+        {
+            var startLocation = _current.Location;
+
+            // Parse the first 'if' branch
+            Consume(TokenType.If); // consume 'if'
+            var ifBranch = ParseConditionalBlock();
+
+            // Parse optional 'else if' branches
+            var elseIfBranches = new List<Ast.ConditionalBlock>();
+            while (_current.Type is TokenType.Else && _next.Type is TokenType.If)
+            {
+                Consume(TokenType.Else); // consume 'else'
+                Consume(TokenType.If);   // consume 'if'
+                elseIfBranches.Add(ParseConditionalBlock());
+            }
+
+            // Parse optional 'else' block
+            Ast.Block? elseBlock = null;
+            if (_current.Type is TokenType.Else)
+            {
+                var elseLocation = _current.Location;
+                Consume(TokenType.Else); // consume 'else'
+                Consume(TokenType.Newline); // expect newline after 'else'
+
+                // Expect an indented block (else block cannot be empty).
+                if (_current.Type is not TokenType.Indent)
+                {
+                    throw new InvalidSyntaxException("Else clause has no body", elseLocation.After());
+                }
+
+                elseBlock = ParseBlock();
+            }
+
+            return new Ast.If(ifBranch, elseIfBranches, elseBlock, startLocation | ifBranch.Location);
+        }
+
+        /// <summary>
+        /// Parses a conditional block (condition + then block).
+        /// </summary>
+        /// <returns>The parsed conditional block.</returns>
+        /// <exception cref="InvalidSyntaxException">Thrown when the then block is missing.</exception>
+        private Ast.ConditionalBlock ParseConditionalBlock()
+        {
+            var startLocation = _current.Location;
+            var condition = ParseExpression();
+            Consume(TokenType.Newline); // expect newline after condition
+
+            // Expect an indented block (then block cannot be empty).
+            if (_current.Type is not TokenType.Indent)
+            {
+                throw new InvalidSyntaxException("If statement has no body", condition.Location.After());
+            }
+
+            var thenBlock = ParseBlock();
+            return new Ast.ConditionalBlock(condition.AssertBoolean(), thenBlock, startLocation | condition.Location);
         }
 
         private Ast.Identifier ParseIdentifier()

@@ -8,16 +8,28 @@ namespace BitPatch.DialogLang
     internal static class Utils
     {
         /// <summary>
-        /// Pushes a list of statements onto the stack in reverse order.
+        /// Pushes the statements of a block onto the stack in reverse order.
         /// </summary>
+        /// <param name="block">The block whose statements to push.</param>
         /// <param name="stack">The stack to push statements onto.</param>
-        /// <param name="statements">The list of statements to push.</param>
-        public static void PushStatements(this Stack<Ast.Statement> stack, IReadOnlyList<Ast.Statement> statements)
+        public static void PushTo(this Ast.Block block, Stack<Ast.Statement> stack)
         {
+            var statements = block.Statements;
+
             for (int i = statements.Count - 1; i >= 0; i--)
             {
                 stack.Push(statements[i]);
             }
+        }
+
+        /// <summary>
+        /// Pushes a statement onto the stack.
+        /// </summary>
+        /// <param name="statement">The statement to push.</param>
+        /// <param name="stack">The stack to push the statement onto.</param>
+        public static void PushTo(this Ast.Statement statement, Stack<Ast.Statement> stack)
+        {
+            stack.Push(statement);
         }
 
         /// <summary>
