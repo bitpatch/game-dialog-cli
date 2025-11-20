@@ -11,5 +11,10 @@ namespace BitPatch.DialogLang
                 stack.Push(statements[i]);
             }
         }
+
+        public static Location After(this Location location)
+        {
+            return new Location(location.Line, location.Final, location.Final + 1);
+        }
     }
 }

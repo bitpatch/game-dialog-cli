@@ -116,21 +116,27 @@ namespace BitPatch.DialogLang
         /// </summary>
         private Ast.While ParseWhile()
         {
-            var location = _current.Location;
+            var startLocation = _current.Location;
 
             Consume(TokenType.While); // consume 'while'
             var condition = ParseExpression();
+
+            if (condition is not Ast.IBoolean)
+            {
+                throw new InvalidSyntaxException("Expression cannot be boolean", condition.Location);
+            }
+
             Consume(TokenType.Newline); // expect newline after condition
 
             // Expect an indented block (body cannot be empty)
             if (_current.Type is not TokenType.Indent)
             {
-                throw new InvalidSyntaxException("While loop body cannot be empty", location);
+                throw new InvalidSyntaxException("While loop has no body", condition.Location.After());
             }
 
             var body = ParseBlock();
 
-            return new Ast.While(condition, body, location);
+            return new Ast.While(condition, body, startLocation | condition.Location);
         }
 
         private Ast.Identifier ParseIdentifier()

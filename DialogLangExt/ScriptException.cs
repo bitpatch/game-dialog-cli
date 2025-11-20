@@ -32,12 +32,12 @@ namespace BitPatch.DialogLang
         }
 
         internal InvalidSyntaxException(string message, Location location)
-            : base(message, location)
+            : base("Invalid syntax: " + message, location)
         {
         }
 
         internal InvalidSyntaxException(string message, int line, int column)
-            : base(message, new Location(line, column))
+            : base("Invalid syntax: " + message, new Location(line, column))
         {
         }
     }
