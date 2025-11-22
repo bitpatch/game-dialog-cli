@@ -4,12 +4,6 @@ namespace DialogLang.Tests;
 
 public class ComparisonTests
 {
-    private static List<object> ExecuteScript(string script)
-    {
-        var dialog = new Dialog();
-        return [.. dialog.Execute(script)];
-    }
-
     [Theory]
     [InlineData("<< 5 > 0", true)]
     [InlineData("<< 3 < 2.99999", false)]
@@ -21,10 +15,10 @@ public class ComparisonTests
     public void Comparison(string script, bool expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -51,16 +45,16 @@ public class ComparisonTests
     public void Equal(string script, bool expected)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Fact]
     public void VariablesWithComparisons()
     {
-        var results = ExecuteScript("""
+        var results = Utils.Execute("""
             a = 5
             b = 3
             << a > b
@@ -71,7 +65,7 @@ public class ComparisonTests
             << a != b
             """);
 
-        Assert.Equal(new object[] { true, false, true, true, true, true }, results);
+        results.AssertEqual([true, false, true, true, true, true]);
     }
 
 
@@ -83,7 +77,7 @@ public class ComparisonTests
     public void CannotCompare(string script, int initial, int final)
     {
         // Act
-        var ex = Assert.Throws<ScriptException>(() => ExecuteScript(script));
+        var ex = Assert.Throws<ScriptException>(() => Utils.Execute(script));
         Assert.Equal(initial, ex.Initial);
         Assert.Equal(final, ex.Final);
     }
@@ -98,10 +92,10 @@ public class ComparisonTests
     public void EqualityWithDifferentTypes(string script)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert - different types are never equal
-        Assert.Equal(new object[] { false }, results);
+        results.AssertFalse();
     }
 
     [Theory]
@@ -113,9 +107,9 @@ public class ComparisonTests
     public void InequalityWithDifferentTypes(string script)
     {
         // Act
-        var results = ExecuteScript(script);
+        var results = Utils.Execute(script);
 
         // Assert - different types are always not equal
-        Assert.Equal(new object[] { true }, results);
+        results.AssertTrue();
     }
 }

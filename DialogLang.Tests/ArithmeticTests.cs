@@ -21,7 +21,7 @@ public class ArithmeticTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -31,20 +31,19 @@ public class ArithmeticTests
     [InlineData("<< 3.5 + 1.5", 5.0f)]
     [InlineData("<< 10.5 - 2.5", 8.0f)]
     [InlineData("<< 5 / 2", 2.5f)]
-    [InlineData("<< 20 / 4", 5.0f)]
-    [InlineData("<< 2.5 * 4.0", 10.0f)]
-    [InlineData("<< 10.0 / 2.0", 5.0f)]
+    [InlineData("<< 20 / 4", 5)]
+    [InlineData("<< 2.5 * 4.0", 10)]
+    [InlineData("<< 10.0 / 2.0", 5)]
     [InlineData("<< -2.5", -2.5f)]
-    [InlineData("<< 7.5 % 2.5", 0.0f)]
-    [InlineData("<< 10.0 % 3.0", 1.0f)]
+    [InlineData("<< 7.5 % 2.5", 0)]
+    [InlineData("<< 10.0 % 3.0", 1)]
     public void Floats(string script, float expected)
     {
         // Act
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Single(results);
-        Assert.Equal(expected, (float)results[0], precision: 5);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -63,7 +62,7 @@ public class ArithmeticTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Fact]

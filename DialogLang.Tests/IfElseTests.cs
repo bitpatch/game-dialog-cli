@@ -7,34 +7,41 @@ public class IfElseTests
     [Fact]
     public void SimpleIf()
     {
+        // Arrange
         var source = """
         x = 5
         if x > 3
             << x
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
-        Assert.Equal(new object[] { 5 }, results);
+        // Assert
+        results.AssertEqual(5);
     }
 
     [Fact]
     public void SimpleIfFalse()
     {
+        // Arrange
         var source = """
         x = 2
         if x > 3
             << x
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
+        // Assert
         Assert.Empty(results);
     }
 
     [Fact]
     public void IfElse()
     {
+        // Arrange
         var source = """
         x = 2
         if x > 3
@@ -43,14 +50,17 @@ public class IfElseTests
             << x + 1
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
-        Assert.Equal(new object[] { 3 }, results);
+        // Assert
+        results.AssertEqual(3);
     }
 
     [Fact]
     public void IfElseIfElse()
     {
+        // Arrange
         var source = """
         x = 5
         y = 5
@@ -62,14 +72,17 @@ public class IfElseTests
             << 3
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
-        Assert.Equal(new object[] { 2 }, results);
+        // Assert
+        results.AssertEqual(2);
     }
 
     [Fact]
     public void MultipleElseIf()
     {
+        // Arrange
         var source = """
         x = 15
         if x < 10
@@ -82,14 +95,17 @@ public class IfElseTests
             << 4
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
-        Assert.Equal(new object[] { 2 }, results);
+        // Assert
+        results.AssertEqual(2);
     }
 
     [Fact]
     public void NestedIf()
     {
+        // Arrange
         var source = """
         x = 5
         y = 10
@@ -102,14 +118,17 @@ public class IfElseTests
             << 0
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
-        Assert.Equal(new object[] { 15 }, results);
+        // Assert
+        results.AssertEqual(15);
     }
 
     [Fact]
     public void IfWithMultipleStatements()
     {
+        // Arrange
         var source = """
         x = 3
         y = 4
@@ -120,43 +139,51 @@ public class IfElseTests
             << y
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
-        Assert.Equal(new object[] { 4, 5 }, results);
+        // Assert
+        results.AssertEqual(4, 5);
     }
 
     [Fact]
     public void InvalidCondition()
     {
+        // Arrange
         var source = """
         x = 3
         if x + 1
             << x
         """;
 
+        // Act
         var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
-        Assert.Equal(4, ex.Initial);
-        Assert.Equal(9, ex.Final);
+
+        // Assert
+        ex.AssertLocation(2, 4, 9);
     }
 
     [Fact]
     public void NoThenBlock()
     {
+        // Arrange
         var source = """
         x = 3
         if x > 0
         << x
         """;
 
+        // Act
         var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
-        Assert.Equal(2, ex.Line);
-        Assert.Equal(9, ex.Initial);
-        Assert.Equal(10, ex.Final);
+
+        // Assert
+        ex.AssertLocation(2, 9, 10);
     }
 
     [Fact]
     public void NoElseBlock()
     {
+        // Arrange
         var source = """
         x = 3
         if x > 0
@@ -165,15 +192,17 @@ public class IfElseTests
         << x + 1
         """;
 
+        // Act
         var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
-        Assert.Equal(4, ex.Line);
-        Assert.Equal(5, ex.Initial);
-        Assert.Equal(6, ex.Final);
+
+        // Assert
+        ex.AssertLocation(4, 5, 6);
     }
 
     [Fact]
     public void NoElseIfBlock()
     {
+        // Arrange
         var source = """
         x = 3
         if x > 0
@@ -182,15 +211,17 @@ public class IfElseTests
         << 0
         """;
 
+        // Act
         var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
-        Assert.Equal(4, ex.Line);
-        Assert.Equal(15, ex.Initial);
-        Assert.Equal(16, ex.Final);
+
+        // Assert
+        ex.AssertLocation(4, 15, 16);
     }
 
     [Fact]
     public void ElseIfWithInvalidCondition()
     {
+        // Arrange
         var source = """
         x = 3
         if x > 5
@@ -199,15 +230,17 @@ public class IfElseTests
             << 2
         """;
 
+        // Act
         var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
-        Assert.Equal(4, ex.Line);
-        Assert.Equal(9, ex.Initial);
-        Assert.Equal(14, ex.Final);
+
+        // Assert
+        ex.AssertLocation(4, 9, 14);
     }
 
     [Fact]
     public void AllConditionsFalseNoElse()
     {
+        // Arrange
         var source = """
         x = 100
         if x < 10
@@ -216,8 +249,10 @@ public class IfElseTests
             << 2
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
+        // Assert
         Assert.Empty(results);
     }
 }

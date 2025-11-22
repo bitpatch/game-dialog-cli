@@ -17,7 +17,7 @@ public class BlockTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { 5 }, results);
+        results.AssertEqual(5);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class BlockTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { 1, 2, 3 }, results);
+        results.AssertEqual(1, 2, 3);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class BlockTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { 6 }, results);
+        results.AssertEqual(6);
     }
 
     [Fact]
@@ -91,7 +91,7 @@ public class BlockTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { 3 }, results);
+        results.AssertEqual(3);
     }
 
     [Fact]
@@ -104,7 +104,7 @@ public class BlockTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { 6 }, results);
+        results.AssertEqual(6);
     }
 
     [Fact]

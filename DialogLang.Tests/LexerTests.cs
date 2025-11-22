@@ -4,16 +4,10 @@ namespace DialogLang.Tests;
 
 public class LexerTests
 {
-    private static List<Token> Tokenize(string source)
-    {
-        using var reader = new StringReader(source);
-        var lexer = new BitPatch.DialogLang.Lexer(reader);
-        return [.. lexer.Tokenize()];
-    }
-
     [Fact]
     public void Indentation()
     {
+        // Arrange
         var source = """
         x = 1
         # Some text
@@ -26,10 +20,9 @@ public class LexerTests
 
             z = 3
         """;
-        var result = Tokenize(source);
 
         var expected = new[]
-        {
+{
             TokenType.Identifier, TokenType.Assign, TokenType.Integer, TokenType.Newline,
             TokenType.Indent,
             TokenType.Identifier, TokenType.Assign, TokenType.Integer, TokenType.Newline,
@@ -44,20 +37,23 @@ public class LexerTests
             TokenType.EndOfFile
         };
 
+        // Act
+        var result = source.Tokenize();
+
+        // Assert
         Assert.Equal(expected, result.Select(t => t.Type));
     }
 
     [Fact]
     public void WhileLoop()
     {
+        // Arrange
         var source = """
         x = 3
         while x > 0
             << x
             x = x - 1
         """;
-
-        var result = Tokenize(source);
 
         var expected = new[]
         {
@@ -69,7 +65,11 @@ public class LexerTests
             TokenType.Dedent,
             TokenType.EndOfFile
         };
-        
+
+        // Act
+        var result = source.Tokenize();
+
+        // Assert
         Assert.Equal(expected, result.Select(t => t.Type));
     }
 }

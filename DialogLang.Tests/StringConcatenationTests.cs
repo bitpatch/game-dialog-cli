@@ -16,7 +16,7 @@ public class StringConcatenationTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -29,7 +29,7 @@ public class StringConcatenationTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -43,7 +43,7 @@ public class StringConcatenationTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -57,7 +57,7 @@ public class StringConcatenationTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -71,7 +71,7 @@ public class StringConcatenationTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]
@@ -84,7 +84,7 @@ public class StringConcatenationTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Fact]

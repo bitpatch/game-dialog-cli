@@ -7,6 +7,7 @@ public class WhileTests
     [Fact]
     public void Simple()
     {
+        // Arrange
         var source = """
         x = 3
         while x > 0
@@ -14,14 +15,17 @@ public class WhileTests
             x = x - 1
         """;
 
+        // Act
         var results = Utils.Execute(source);
 
-        Assert.Equal(new object[] { 3, 2, 1 }, results);
+        // Assert
+        results.AssertEqual(3, 2, 1);
     }
 
     [Fact]
     public void InvalidCondition()
     {
+        // Arrange
         var source = """
         x = 3
         while x - 1
@@ -29,14 +33,17 @@ public class WhileTests
             x = x - 1
         """;
 
+        // Act
         var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
-        Assert.Equal(7, ex.Initial);
-        Assert.Equal(12, ex.Final);
+
+        // Assert
+        ex.AssertLocation(2, 7, 12);
     }
 
     [Fact]
     public void NoBody()
     {
+        // Arrange
         var source = """
         x = 3
         while x > 0
@@ -44,15 +51,17 @@ public class WhileTests
         x = x - 1
         """;
 
+        // Act
         var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
-        Assert.Equal(2, ex.Line);
-        Assert.Equal(12, ex.Initial);
-        Assert.Equal(13, ex.Final);
+
+        // Assert
+        ex.AssertLocation(2, 12, 13);
     }
 
     [Fact]
     public void CannotCompare()
     {
+        // Arrange
         var source = """
         a = true
         while a > 0
@@ -60,15 +69,17 @@ public class WhileTests
             a = false
         """;
 
+        // Act
         var ex = Assert.Throws<ScriptException>(() => Utils.Execute(source));
-        Assert.Equal(2, ex.Line);
-        Assert.Equal(7, ex.Initial);
-        Assert.Equal(8, ex.Final);
+
+        // Assert
+        ex.AssertLocation(2, 7, 8);
     }
 
     [Fact]
     public void ExpectedBoolean()
     {
+        // Arrange
         var source = """
         value = "Hello"
         while value
@@ -76,15 +87,17 @@ public class WhileTests
             a = false
         """;
 
+        // Act
         var ex = Assert.Throws<ScriptException>(() => Utils.Execute(source));
-        Assert.Equal(2, ex.Line);
-        Assert.Equal(7, ex.Initial);
-        Assert.Equal(12, ex.Final);
+
+        // Assert
+        ex.AssertLocation(2, 7, 12);
     }
 
     [Fact]
     public void InfinitBool()
     {
+        // Arrange
         var source = """
         a = 0
         while true
@@ -92,7 +105,10 @@ public class WhileTests
             << a
         """;    
 
+        // Act
         var ex = Assert.Throws<ScriptException>(() => Utils.Execute(source));
-        Assert.Equal(2, ex.Line);
+
+        // Assert
+        ex.AssertLocation(2, 1, 11);
     }
 }

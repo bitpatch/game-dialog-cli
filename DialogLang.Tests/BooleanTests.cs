@@ -35,7 +35,7 @@ public class BooleanTests
         var results = Utils.Execute(script);
 
         // Assert
-        Assert.Equal(new object[] { expected }, results);
+        results.AssertEqual(expected);
     }
 
     [Theory]

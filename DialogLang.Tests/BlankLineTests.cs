@@ -8,10 +8,11 @@ public class BlankLineTests
         // Arrange
         var script = "<< \"Hello!\"\n"; // Script with trailing newline
 
-        // Act & Assert
+        // Act
         var output = Utils.Execute(script);
-        Assert.Single(output);
-        Assert.Equal("Hello!", output[0]);
+
+        // Assert
+        output.AssertEqual("Hello!");
     }
 
     [Fact]
@@ -20,10 +21,11 @@ public class BlankLineTests
         // Arrange
         var script = "<< \"Hello!\"\n\n\n"; // Script with multiple trailing newlines
 
-        // Act & Assert
+        // Act
         var output = Utils.Execute(script);
-        Assert.Single(output);
-        Assert.Equal("Hello!", output[0]);
+
+        // Assert
+        output.AssertEqual("Hello!");
     }
 
     [Fact]
@@ -54,10 +56,11 @@ public class BlankLineTests
         // Arrange
         var script = "\n\n<< \"Hello!\"";
 
-        // Act & Assert
+        // Act
         var output = Utils.Execute(script);
-        Assert.Single(output);
-        Assert.Equal("Hello!", output[0]);
+
+        // Assert
+        output.AssertEqual("Hello!");
     }
 
     [Fact]
@@ -66,10 +69,10 @@ public class BlankLineTests
         // Arrange
         var script = "<< \"First\"\n\n\n<< \"Second\"\n";
 
-        // Act & Assert
+        // Act
         var output = Utils.Execute(script);
-        Assert.Equal(2, output.Count);
-        Assert.Equal("First", output[0]);
-        Assert.Equal("Second", output[1]);
+
+        // Assert
+        output.AssertEqual(["First", "Second"]);
     }
 }
