@@ -19,11 +19,12 @@ The main interpreter implementation for Game Dialog Script Language (.gds files)
 - **C# Version**: 9.0
 - **Architecture**: Classic three-stage streaming pipeline: `Lexer → Parser → Interpreter`
 - **Key Classes**:
-  - `Dialog` - Public API entry point
+  - `Dialog` - Public API entry point (only public class)
   - `Lexer` - Tokenizes source code (internal)
   - `Parser` - Builds AST from tokens (internal)
   - `Interpreter` - Executes AST statements (internal)
-  - `Ast.Nodes` - AST node definitions
+  - `Ast.Nodes` - AST node definitions using C# records
+- **Unity Integration**: Includes `GameDialogScript.asmdef` for Unity compatibility
 
 ### GDialog (CLI Tool)
 
@@ -32,14 +33,15 @@ Command-line tool for running .gds script files.
 - **Command**: `gdialog script.gds`
 - **Target Framework**: `net10.0`
 - **Package**: Published as .NET global tool (`gdialog`)
+- **Distribution**: NuGet global tool + Homebrew (with special `Homebrew` build configuration)
 - **Key Files**:
-  - `Program.cs` - Entry point
-  - `ScriptExecutor.cs` - Script execution logic
+  - `Program.cs` - Minimal entry point using switch expressions
+  - `ScriptExecutor.cs` - Script execution with detailed error reporting
   - `CommandLineOptions.cs` - CLI argument parsing
 
 ### DialogLang.Tests
 
-Unit tests for the interpreter using xUnit.
+Unit tests for the interpreter using xUnit, with `Utils.Execute()` helper for streamlined testing.
 
 ## Architecture Guidelines
 
@@ -49,16 +51,28 @@ All three stages (Lexer, Parser, Interpreter) MUST operate in streaming mode:
 
 - Data flows through pipeline using `IEnumerable<T>` and `yield return`
 - **No buffering** - process tokens, AST nodes, and dialog lines incrementally
-- Lexer yields tokens one by one as they are parsed
-- Parser yields AST statements one by one as tokens are consumed
-- Interpreter yields output strings one by one as statements are executed
+- Example: `Dialog.Execute(reader)` streams from `TextReader → Lexer → Parser → Interpreter`
+- Each stage yields items one by one (tokens, statements, output values)
 - This enables processing large scripts without loading everything into memory
+
+### Error Handling Pattern
+
+- `ScriptException` base class with `Location` tracking (line/column info)
+- Specific exception types: `InvalidSyntaxException`, `TypeMismatchException`
+- CLI shows errors with source context: line highlighting and column markers
+- Use `ScriptExecutor.PrintScriptError()` pattern for user-friendly error display
 
 ### Nullable Reference Types
 
 - **TreatWarningsAsErrors** is enabled - all nullable warnings are compilation errors
 - **Internal/private classes and methods**: Do NOT add null checks for non-nullable parameters - the compiler enforces null safety at compile time
 - **Public API classes and methods** (including public constructors and methods of internal classes): ALWAYS add explicit null checks with `ArgumentNullException` for non-nullable parameters, as external consumers may have different nullable settings or use reflection
+
+### AST Design
+
+- All AST nodes are C# records inheriting from `Node(Location)`
+- Two main categories: `Statement` (executed) and `Expression` (evaluated)
+- Use `IBoolean` interface to mark expressions that can be used in conditionals
 
 ### Language Features
 
@@ -72,6 +86,30 @@ The Game Dialog Script Language supports:
 - **Boolean logic**: `and`, `or`, `not`, `true`, `false`
 - **Control flow**: `if`/`else`, `while` loops
 - **Indentation-based blocks**: Spaces or tabs (consistent style enforced)
+
+## Development Workflows
+
+### Building and Testing
+
+- **Build**: Use VS Code's default build task or `dotnet build GDialog/GDialog.csproj`
+- **Tests**: Run all tests with `dotnet test DialogLang.Tests/`
+- **Local Testing**: Use `Utils.Execute("script")` in tests for quick execution
+- **CLI Testing**: Build then run `dotnet run --project GDialog script.gds`
+
+### Distribution Builds
+
+- **NuGet Global Tool**: Standard `Release` configuration publishes to NuGet
+- **Homebrew**: Special `Homebrew` configuration creates self-contained ARM64 binary
+  - Uses `RuntimeIdentifier=osx-arm64` and `PublishSingleFile=true`
+  - Automatically creates `.tar.gz` archive via MSBuild target
+- Both disable debug symbols (`DebugType=none`) for smaller packages
+
+### Testing Patterns
+
+- Use `Utils.Execute()` helper: `var output = Utils.Execute("x = 1\n<< x");`
+- Test files typically verify both output and final variable state
+- Lexer tests use `Tokenize()` helper to convert source to token list
+- Follow pattern: Arrange (script string) → Act (Execute) → Assert (output + variables)
 
 ## Code Style
 
