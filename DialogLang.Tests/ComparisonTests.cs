@@ -77,7 +77,7 @@ public class ComparisonTests
     public void CannotCompare(string script, int initial, int final)
     {
         // Act
-        var ex = Assert.Throws<ScriptException>(() => Utils.Execute(script));
+        var ex = Assert.Throws<RuntimeError>(() => Utils.Execute(script));
         Assert.Equal(initial, ex.Initial);
         Assert.Equal(final, ex.Final);
     }
