@@ -157,7 +157,7 @@ public class IfElseTests
         """;
 
         // Act
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
         ex.AssertLocation(2, 4, 9);
@@ -174,10 +174,10 @@ public class IfElseTests
         """;
 
         // Act
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(2, 9, 10);
+        ex.AssertLocation(2, 9, 11);
     }
 
     [Fact]
@@ -193,10 +193,10 @@ public class IfElseTests
         """;
 
         // Act
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(4, 5, 6);
+        ex.AssertLocation(4, 5, 7);
     }
 
     [Fact]
@@ -212,10 +212,10 @@ public class IfElseTests
         """;
 
         // Act
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(4, 15, 16);
+        ex.AssertLocation(4, 15, 17);
     }
 
     [Fact]
@@ -231,7 +231,7 @@ public class IfElseTests
         """;
 
         // Act
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
         ex.AssertLocation(4, 9, 14);

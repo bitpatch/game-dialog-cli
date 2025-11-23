@@ -5,7 +5,7 @@ namespace GDialog;
 /// <summary>
 /// Handles execution of Game Dialog Script files.
 /// </summary>
-internal static class ScriptExecutor
+internal static class ScriptRunner
 {
     /// <summary>
     /// Executes a Game Dialog Script file.
@@ -16,7 +16,7 @@ internal static class ScriptExecutor
     {
         if (!File.Exists(scriptPath))
         {
-            Console.WriteLine($"Error: File '{scriptPath}' not found.");
+            Console.Error.WriteLine($"Error: File '{scriptPath}' not found.");
             return 1;
         }
 
@@ -37,15 +37,15 @@ internal static class ScriptExecutor
 
             return 0;
         }
-        catch (ScriptException ex)
+        catch (ScriptError ex)
         {
-            Console.WriteLine($"{ex.Message}, line {ex.Line}");
-            Console.WriteLine(LogUtils.FormatError(ex));
+            Console.Error.WriteLine($"---");
+            Console.Error.WriteLine(LogUtils.FormatError(ex));
             return 1;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error: {ex.Message}");
+            Console.Error.WriteLine($"Error: {ex.Message}");
             return 1;
         }
     }

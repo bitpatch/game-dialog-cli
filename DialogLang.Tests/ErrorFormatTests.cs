@@ -14,12 +14,13 @@ public class ErrorFormatTests
             << "Hello!"
         """;
 
-        ScriptException? caughtException = null;
+        ScriptError? caughtException = null;
+
         try
         {
             Utils.Execute(source);
         }
-        catch (ScriptException ex)
+        catch (ScriptError ex)
         {
             caughtException = ex;
         }
@@ -32,7 +33,7 @@ public class ErrorFormatTests
 
         // Assert
         Assert.Contains("if reputation > 5", formatted);
-        Assert.Contains("~", formatted); // Contains underline
+        Assert.Contains("¯", formatted); // Contains underline
     }
 
     [Fact]
@@ -41,12 +42,12 @@ public class ErrorFormatTests
         // Arrange
         var source = "<< 10 / 0";
         
-        ScriptException? caughtException = null;
+        ScriptError? caughtException = null;
         try
         {
             Utils.Execute(source);
         }
-        catch (ScriptException ex)
+        catch (ScriptError ex)
         {
             caughtException = ex;
         }
@@ -58,7 +59,7 @@ public class ErrorFormatTests
 
         // Assert
         Assert.Contains("<< 10 / 0", formatted);
-        Assert.Contains("~", formatted);
+        Assert.Contains("¯", formatted);
     }
 
     [Fact]
@@ -74,12 +75,12 @@ public class ErrorFormatTests
         // Arrange
         var source = "<< 10 / 0";
         
-        ScriptException? caughtException = null;
+        ScriptError? caughtException = null;
         try
         {
             Utils.Execute(source);
         }
-        catch (ScriptException ex)
+        catch (ScriptError ex)
         {
             caughtException = ex;
         }
@@ -96,12 +97,12 @@ public class ErrorFormatTests
         // Arrange
         var source = "<< 10 / 0";
         
-        ScriptException? caughtException = null;
+        ScriptError? caughtException = null;
         try
         {
             Utils.Execute(source);
         }
-        catch (ScriptException ex)
+        catch (ScriptError ex)
         {
             caughtException = ex;
         }
@@ -112,7 +113,20 @@ public class ErrorFormatTests
         var formatted = LogUtils.FormatError(caughtException, ">>  ");
 
         // Assert
-        Assert.StartsWith(">>  ", formatted);
-        Assert.Contains("<< 10 / 0", formatted);
+        Assert.StartsWith(">>  << 10 / 0", formatted.Split('\n')[2]);
+    }
+
+    [Fact]
+    public void IncompleteComparisonExpression()
+    {
+        // Arrange
+        var source = """
+        as = 1 > 
+        << as
+        """;
+
+        // Act & Assert
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
+        ex.AssertLocation(1, 10, 12);
     }
 }

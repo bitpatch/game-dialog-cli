@@ -68,7 +68,7 @@ public class ArithmeticTests
     [Fact]
     public void DivByZero()
     {
-        var exception = Assert.Throws<ScriptException>(() => Utils.Execute("<< 10 / 0"));
+        var exception = Assert.Throws<RuntimeError>(() => Utils.Execute("<< 10 / 0"));
         Assert.Contains("Division by zero", exception.Message);
     }
 }

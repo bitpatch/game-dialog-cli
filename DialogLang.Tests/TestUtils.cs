@@ -124,7 +124,7 @@ internal static class Utils
     /// Asserts that the given ScriptException has the expected location.
     /// </summary>
     [StackTraceHidden]
-    public static void AssertLocation(this ScriptException ex, int line, int initial, int final)
+    public static void AssertLocation(this ScriptError ex, int line, int initial, int final)
     {
         Assert.Equal([line, initial, final], [ex.Line, ex.Initial, ex.Final]);
     }

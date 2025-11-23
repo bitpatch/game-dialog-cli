@@ -64,8 +64,8 @@ internal static class CommandLineOptions
     /// <returns>Exit code 2 (invalid usage).</returns>
     public static int ShowUnknownOption(string option)
     {
-        Console.WriteLine($"Error: Unknown option '{option}'");
-        Console.WriteLine("Use 'gdialog --help' for usage information.");
+        Console.Error.WriteLine($"Error: Unknown option '{option}'");
+        Console.Error.WriteLine("Use 'gdialog --help' for usage information.");
         return 2;
     }
 }

@@ -72,7 +72,7 @@ public class BlockTests
             """;
 
         // Act & Assert
-        Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(script));
+        Assert.Throws<SyntaxError>(() => Utils.Execute(script));
     }
 
     [Fact]
@@ -114,6 +114,6 @@ public class BlockTests
         var script = "x = 1\n    y = 2\n\t\tz = 3";
 
         // Act & Assert
-        Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(script));
+        Assert.Throws<SyntaxError>(() => Utils.Execute(script));
     }
 }

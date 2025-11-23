@@ -34,7 +34,7 @@ public class WhileTests
         """;
 
         // Act
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
         ex.AssertLocation(2, 7, 12);
@@ -52,10 +52,10 @@ public class WhileTests
         """;
 
         // Act
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(2, 12, 13);
+        ex.AssertLocation(2, 12, 14);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class WhileTests
         """;
 
         // Act
-        var ex = Assert.Throws<ScriptException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<RuntimeError>(() => Utils.Execute(source));
 
         // Assert
         ex.AssertLocation(2, 7, 8);
@@ -88,7 +88,7 @@ public class WhileTests
         """;
 
         // Act
-        var ex = Assert.Throws<ScriptException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<RuntimeError>(() => Utils.Execute(source));
 
         // Assert
         ex.AssertLocation(2, 7, 12);
@@ -106,7 +106,7 @@ public class WhileTests
         """;    
 
         // Act
-        var ex = Assert.Throws<ScriptException>(() => Utils.Execute(source));
+        var ex = Assert.Throws<RuntimeError>(() => Utils.Execute(source));
 
         // Assert
         ex.AssertLocation(2, 1, 11);

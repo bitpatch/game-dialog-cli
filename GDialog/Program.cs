@@ -11,6 +11,6 @@ return args[0] switch
     "--help" or "-h" => CommandLineOptions.ShowHelp(),
     "--version" or "-v" => CommandLineOptions.ShowVersion(),
     string arg when arg.StartsWith('-') => CommandLineOptions.ShowUnknownOption(arg),
-    _ => ScriptExecutor.Execute(args[0])
+    _ => ScriptRunner.Execute(args[0])
 };
 

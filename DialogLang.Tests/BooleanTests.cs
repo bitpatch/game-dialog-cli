@@ -45,7 +45,7 @@ public class BooleanTests
     [InlineData("<< true and false)")]
     public void InvalidSyntax(string script)
     {
-        Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(script));
+        Assert.Throws<SyntaxError>(() => Utils.Execute(script));
     }
 
     [Theory]
@@ -58,7 +58,7 @@ public class BooleanTests
     [InlineData("<< not \"test\"", 8, 14)]
     public void CannotBeBoolean(string script, int initial, int final)
     {
-        var ex = Assert.Throws<InvalidSyntaxException>(() => Utils.Execute(script));
+        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(script));
         Assert.Equal(initial, ex.Initial);
         Assert.Equal(final, ex.Final);
     }
