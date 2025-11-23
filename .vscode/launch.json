@@ -11,6 +11,28 @@
             "cwd": "${workspaceFolder}/GDialog",
             "console": "integratedTerminal",
             "stopAtEntry": false
+        },
+        {
+            "name": "Run --help",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/GDialog/bin/Debug/net10.0/gdialog.dll",
+            "args": ["--help"],
+            "cwd": "${workspaceFolder}/GDialog",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
+        },
+        {
+            "name": "Run --about",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/GDialog/bin/Debug/net10.0/gdialog.dll",
+            "args": ["--about"],
+            "cwd": "${workspaceFolder}/GDialog",
+            "console": "integratedTerminal",
+            "stopAtEntry": false
         }
     ]
 }

@@ -10,7 +10,15 @@ return args[0] switch
 {
     "--help" or "-h" => CommandLineOptions.ShowHelp(),
     "--version" or "-v" => CommandLineOptions.ShowVersion(),
+    "--about" => CommandLineOptions.ShowAbout(),
     string arg when arg.StartsWith('-') => CommandLineOptions.ShowUnknownOption(arg),
-    _ => ScriptRunner.Execute(args[0])
+    _ => RunScript(args)
 };
+
+static int RunScript(string[] args)
+{
+    var scriptPath = args[0];
+    var showVariables = args.Length > 1 && (args[1] == "--vars" || args[1] == "-v");
+    return ScriptRunner.Run(scriptPath, showVariables);
+}
 

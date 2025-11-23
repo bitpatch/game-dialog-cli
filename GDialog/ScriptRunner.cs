@@ -11,8 +11,9 @@ internal static class ScriptRunner
     /// Executes a Game Dialog Script file.
     /// </summary>
     /// <param name="scriptPath">Path to the script file to execute.</param>
+    /// <param name="showVariables">Whether to display variables after execution.</param>
     /// <returns>Exit code: 0 for success, 1 for errors.</returns>
-    public static int Execute(string scriptPath)
+    public static int Run(string scriptPath, bool showVariables)
     {
         if (!File.Exists(scriptPath))
         {
@@ -20,19 +21,22 @@ internal static class ScriptRunner
             return 1;
         }
 
+        var dialog = new Dialog();
+
         try
         {
-            var dialog = new Dialog();
-
             foreach (var output in dialog.RunFile(scriptPath))
             {
                 Console.WriteLine(output);
             }
 
-            Console.WriteLine("\nVariables:");
-            foreach (var (name, value) in dialog.Variables)
+            if (showVariables)
             {
-                Console.WriteLine($"  {name} = {value}");
+                Console.WriteLine("\nVariables:");
+                foreach (var (name, value) in dialog.Variables)
+                {
+                    Console.WriteLine($"  {name} = {value}");
+                }
             }
 
             return 0;
@@ -41,11 +45,31 @@ internal static class ScriptRunner
         {
             Console.Error.WriteLine($"---");
             Console.Error.WriteLine(LogUtils.FormatError(ex));
+
+            if (showVariables)
+            {
+                Console.WriteLine("\nVariables:");
+                foreach (var (name, value) in dialog.Variables)
+                {
+                    Console.WriteLine($"  {name} = {value}");
+                }
+            }
+
             return 1;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
+
+            if (showVariables)
+            {
+                Console.WriteLine("\nVariables:");
+                foreach (var (name, value) in dialog.Variables)
+                {
+                    Console.WriteLine($"  {name} = {value}");
+                }
+            }
+
             return 1;
         }
     }

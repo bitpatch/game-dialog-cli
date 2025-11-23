@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Reflection;
 
 namespace GDialog;
@@ -24,22 +25,37 @@ internal static class CommandLineOptions
     /// <returns>Exit code 0 (success).</returns>
     public static int ShowHelp()
     {
-        Console.WriteLine("gdialog - Game Dialog Script Interpreter");
+        Console.WriteLine("gdialog - 'Game Dialog Script' CLI tool");
         Console.WriteLine();
         Console.WriteLine("Usage:");
-        Console.WriteLine("  gdialog <script.gds>          Execute a Game Dialog Script file");
-        Console.WriteLine("  gdialog --help                Show this help message");
-        Console.WriteLine("  gdialog --version             Show version information");
+        Console.WriteLine("  gdialog <script.gds> [--vars] Run a script file");
         Console.WriteLine();
         Console.WriteLine("Options:");
         Console.WriteLine("  -h, --help                    Display this help message and exit");
         Console.WriteLine("  -v, --version                 Display version information and exit");
+        Console.WriteLine("  --about                       Show information about 'Game Dialog Script' language");
         Console.WriteLine();
-        Console.WriteLine("Examples:");
-        Console.WriteLine("  gdialog greeting.gds          Run the greeting.gds script");
-        Console.WriteLine("  gdialog demo.gds              Run the demo.gds script");
+        Console.WriteLine("Script running options:");
+        Console.WriteLine("  -v, --vars                    Display variables after script execution");
+        Console.WriteLine("                                (used as: gdialog script.gds -v)");
         Console.WriteLine();
         Console.WriteLine("For more information, visit: https://github.com/bitpatch/game-dialog-cli");
+        return 0;
+    }
+
+    public static int ShowAbout()
+    {
+        Console.WriteLine("---------------------------");
+        Console.WriteLine();
+        Console.WriteLine("Game Dialog Script is a simple and accessible language for");
+        Console.WriteLine("creating branched dialogues in games. Thanks to the fact that");
+        Console.WriteLine("is fully implemented in C#, it is designed for seamless integration");
+        Console.WriteLine("with game engines such as Unity and Godot or any applications");
+        Console.WriteLine("written in C#.");
+        Console.WriteLine();
+        Console.WriteLine("For more information, visit: https://github.com/bitpatch/game-dialog-lang");
+        Console.WriteLine();
+        Console.WriteLine("---------------------------");
         return 0;
     }
 
@@ -50,8 +66,8 @@ internal static class CommandLineOptions
     public static int ShowVersion()
     {
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        var versionString = version != null 
-            ? $"{version.Major}.{version.Minor}.{version.Build}" 
+        var versionString = version != null
+            ? $"{version.Major}.{version.Minor}.{version.Build}"
             : "unknown";
         Console.WriteLine($"gdialog version {versionString}");
         return 0;
