@@ -13,7 +13,7 @@ internal static class Utils
     public static List<RuntimeItem> Execute(string script)
     {
         var dialog = new Dialog();
-        return [.. dialog.Execute(script)];
+        return [.. dialog.RunInline(script)];
     }
 
     /// <summary>
@@ -21,8 +21,7 @@ internal static class Utils
     /// </summary>
     public static List<BitPatch.DialogLang.Ast.Statement> Parse(this string source)
     {
-        using var reader = new StringReader(source);
-        var lexer = new Lexer(reader);
+        using var lexer = new Lexer(Source.Inline(source));
         var parser = new Parser(lexer.Tokenize());
         return [.. parser.Parse()];
     }
@@ -32,8 +31,7 @@ internal static class Utils
     /// </summary>
     public static List<Token> Tokenize(this string source)
     {
-        using var reader = new StringReader(source);
-        var lexer = new Lexer(reader);
+        using var lexer = new Lexer(Source.Inline(source));
         return [.. lexer.Tokenize()];
     }
 

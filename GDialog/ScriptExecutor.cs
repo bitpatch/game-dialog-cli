@@ -25,11 +25,7 @@ internal static class ScriptExecutor
         {
             var dialog = new Dialog();
 
-            // Use streaming from file - no need to load entire file into memory
-            using var fileStream = File.OpenRead(scriptPath);
-            using var reader = new StreamReader(fileStream);
-
-            foreach (var output in dialog.Execute(reader))
+            foreach (var output in dialog.RunFile(scriptPath))
             {
                 Console.WriteLine(output);
             }
