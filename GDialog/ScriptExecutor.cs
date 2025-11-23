@@ -1,4 +1,3 @@
-using System.Text;
 using BitPatch.DialogLang;
 
 namespace GDialog;
@@ -41,69 +40,13 @@ internal static class ScriptExecutor
         catch (ScriptException ex)
         {
             Console.WriteLine($"{ex.Message}, line {ex.Line}");
-            PrintScriptError(scriptPath, ex.Line, ex.Initial, ex.Final);
+            Console.WriteLine(LogUtils.FormatError(ex));
             return 1;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error: {ex.Message}");
             return 1;
-        }
-    }
-
-    /// <summary>
-    /// Prints a script error with context from the source file.
-    /// </summary>
-    /// <param name="scriptPath">Path to the script file.</param>
-    /// <param name="line">Line number where the error occurred.</param>
-    /// <param name="startColumn">Starting column of the error.</param>
-    /// <param name="endColumn">Ending column of the error.</param>
-    private static void PrintScriptError(string scriptPath, int line, int startColumn, int endColumn)
-    {
-        try
-        {
-            if (line <= 0)
-            {
-                Console.WriteLine("    <unknown location>");
-                return;
-            }
-
-            string? errorLine = File.ReadLines(scriptPath).Skip(line - 1).FirstOrDefault();
-            if (errorLine == null)
-            {
-                Console.WriteLine("    <line unavailable>");
-                return;
-            }
-
-            string prefix = "    ";
-            Console.WriteLine(prefix + errorLine);
-
-            // Build the underline with proper spacing and tabs
-            var underlineBuilder = new StringBuilder();
-            underlineBuilder.Append(' ', prefix.Length);
-            
-            // Add spaces/tabs up to the start column
-            for (int i = 1; i < startColumn; i++)
-            {
-                if (i <= errorLine.Length && errorLine[i - 1] == '\t')
-                {
-                    underlineBuilder.Append('\t');
-                }
-                else
-                {
-                    underlineBuilder.Append(' ');
-                }
-            }
-
-            // Underline the error range with tildes
-            int underlineLength = Math.Max(1, endColumn - startColumn);
-            underlineBuilder.Append('~', underlineLength);
-            
-            Console.WriteLine(underlineBuilder.ToString());
-        }
-        catch (Exception)
-        {
-            Console.WriteLine("    <unable to display error location>");
         }
     }
 }
