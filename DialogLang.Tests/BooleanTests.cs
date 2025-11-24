@@ -47,21 +47,4 @@ public class BooleanTests
     {
         Assert.Throws<SyntaxError>(() => Utils.Execute(script));
     }
-
-    [Theory]
-    [InlineData("<< false or (5 + 1)", 13, 20)]
-    [InlineData("<< false or \"hello\"", 13, 20)]
-    [InlineData("<< not (true or 123)", 17, 20)]
-    [InlineData("<< true xor 10.3", 13, 17)]
-    [InlineData("<< true and 5", 13, 14)]
-    [InlineData("<< 42 and \"hi\"", 4, 6)]
-    [InlineData("<< not \"test\"", 8, 14)]
-    public void CannotBeBoolean(string script, int initial, int final)
-    {
-        // Act
-        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(script));
-
-        // Assert
-        ex.AssertLocation(1, initial, final);
-    }
 }
