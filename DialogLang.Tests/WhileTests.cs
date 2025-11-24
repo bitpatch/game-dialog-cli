@@ -55,7 +55,7 @@ public class WhileTests
         var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(2, 12, 14);
+        ex.AssertLocation(2, 12, 13);
     }
 
     [Fact]

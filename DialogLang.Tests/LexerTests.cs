@@ -34,7 +34,7 @@ public class LexerTests
             TokenType.Identifier, TokenType.Assign, TokenType.Integer, TokenType.Newline,
             TokenType.Dedent,
             TokenType.Dedent,
-            TokenType.EndOfFile
+            TokenType.EndOfSource
         };
 
         // Act
@@ -63,7 +63,7 @@ public class LexerTests
             TokenType.Output, TokenType.Identifier, TokenType.Newline,
             TokenType.Identifier, TokenType.Assign, TokenType.Identifier, TokenType.Minus, TokenType.Integer, TokenType.Newline,
             TokenType.Dedent,
-            TokenType.EndOfFile
+            TokenType.EndOfSource
         };
 
         // Act

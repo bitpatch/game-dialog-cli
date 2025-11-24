@@ -78,8 +78,9 @@ public class ComparisonTests
     {
         // Act
         var ex = Assert.Throws<RuntimeError>(() => Utils.Execute(script));
-        Assert.Equal(initial, ex.Initial);
-        Assert.Equal(final, ex.Final);
+
+        // Assert
+        ex.AssertLocation(1, initial, final);
     }
 
     [Theory]

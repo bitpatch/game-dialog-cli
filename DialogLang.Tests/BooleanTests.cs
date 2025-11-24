@@ -49,7 +49,7 @@ public class BooleanTests
     }
 
     [Theory]
-    [InlineData("<< false or (5 + 1)", 14, 19)]
+    [InlineData("<< false or (5 + 1)", 13, 20)]
     [InlineData("<< false or \"hello\"", 13, 20)]
     [InlineData("<< not (true or 123)", 17, 20)]
     [InlineData("<< true xor 10.3", 13, 17)]
@@ -58,8 +58,10 @@ public class BooleanTests
     [InlineData("<< not \"test\"", 8, 14)]
     public void CannotBeBoolean(string script, int initial, int final)
     {
+        // Act
         var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(script));
-        Assert.Equal(initial, ex.Initial);
-        Assert.Equal(final, ex.Final);
+
+        // Assert
+        ex.AssertLocation(1, initial, final);
     }
 }

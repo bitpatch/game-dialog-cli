@@ -57,20 +57,5 @@ internal static class ScriptRunner
 
             return 1;
         }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
-
-            if (showVariables)
-            {
-                Console.WriteLine("\nVariables:");
-                foreach (var (name, value) in dialog.Variables)
-                {
-                    Console.WriteLine($"  {name} = {value}");
-                }
-            }
-
-            return 1;
-        }
     }
 }

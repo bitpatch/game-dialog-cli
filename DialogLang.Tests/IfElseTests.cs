@@ -177,7 +177,7 @@ public class IfElseTests
         var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(2, 9, 11);
+        ex.AssertLocation(2, 9, 10);
     }
 
     [Fact]
@@ -196,7 +196,7 @@ public class IfElseTests
         var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(4, 5, 7);
+        ex.AssertLocation(4, 5, 6);
     }
 
     [Fact]
@@ -215,7 +215,7 @@ public class IfElseTests
         var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
 
         // Assert
-        ex.AssertLocation(4, 15, 17);
+        ex.AssertLocation(4, 15, 16);
     }
 
     [Fact]

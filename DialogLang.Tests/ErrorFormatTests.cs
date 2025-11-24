@@ -127,6 +127,6 @@ public class ErrorFormatTests
 
         // Act & Assert
         var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
-        ex.AssertLocation(1, 10, 12);
+        ex.AssertLocation(1, 10, 11);
     }
 }
