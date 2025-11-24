@@ -42,7 +42,7 @@ internal static class Utils
     public static void AssertEqual(this List<RuntimeItem> actual, int expected)
     {
         Assert.Single(actual);
-        var integer = Assert.IsType<Integer>(actual[0]);
+        var integer = Assert.IsType<RuntimeInteger>(actual[0]);
         Assert.Equal(expected, integer.Value);
     }
 
@@ -53,7 +53,7 @@ internal static class Utils
     public static void AssertEqual(this List<RuntimeItem> actual, float expected)
     {
         Assert.Single(actual);
-        var number = Assert.IsType<Float>(actual[0]);
+        var number = Assert.IsType<RuntimeFloat>(actual[0]);
         Assert.Equal(expected, number.FloatValue, precision: 5);
     }
 
@@ -65,7 +65,7 @@ internal static class Utils
     {
 
         Assert.Single(actual);
-        var str = Assert.IsType<BitPatch.DialogLang.String>(actual[0]);
+        var str = Assert.IsType<RuntimeString>(actual[0]);
         Assert.Equal(expected, str.Value);
     }
 
@@ -77,7 +77,7 @@ internal static class Utils
     {
 
         Assert.Single(actual);
-        var boolean = Assert.IsType<BitPatch.DialogLang.Boolean>(actual[0]);
+        var boolean = Assert.IsType<RuntimeBoolean>(actual[0]);
         Assert.Equal(expected, boolean.Value);
     }
 
@@ -109,7 +109,7 @@ internal static class Utils
 
         for (int i = 0; i < expected.Length; i++)
         {
-            if (actual[i] is Value value)
+            if (actual[i] is RuntimeValue value)
             {
                 Assert.Equal(expected[i], value.GetValue());
             }

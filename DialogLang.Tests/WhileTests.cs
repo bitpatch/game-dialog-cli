@@ -34,7 +34,7 @@ public class WhileTests
         """;
 
         // Act
-        var ex = Assert.Throws<SyntaxError>(() => Utils.Execute(source));
+        var ex = Assert.Throws<RuntimeError>(() => Utils.Execute(source));
 
         // Assert
         ex.AssertLocation(2, 7, 12);

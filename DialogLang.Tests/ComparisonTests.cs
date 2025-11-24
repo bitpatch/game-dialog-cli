@@ -73,7 +73,7 @@ public class ComparisonTests
     [Theory]
     [InlineData("<< 5 > \"hello\"", 8, 15)]
     [InlineData("<< \"test\" < 10", 4, 10)]
-    [InlineData("<< true >= \"5\"", 4, 15)]
+    [InlineData("<< true >= \"5\"", 4, 8)]
     public void CannotCompare(string script, int initial, int final)
     {
         // Act
