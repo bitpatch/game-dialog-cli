@@ -5,7 +5,7 @@ namespace DialogLang.Tests;
 public class BlankLineTests
 {
     [Fact]
-    public void EndingWithBlankLineParsing()
+    public void EndsWithBlankLineParsing()
     {
         // Arrange
         var script = "<< \"Hello!\"\n"; // Script with trailing newline
@@ -24,7 +24,7 @@ public class BlankLineTests
     }
 
     [Fact]
-    public void EndingWithBlankLine()
+    public void EndsWithBlankLine()
     {
         // Arrange
         var script = "<< \"Hello!\"\n"; // Script with trailing newline
@@ -37,7 +37,7 @@ public class BlankLineTests
     }
 
     [Fact]
-    public void ScriptEndingWithMultipleBlankLines()
+    public void EndsWithMultiBlankLines()
     {
         // Arrange
         var script = "<< \"Hello!\"\n\n\n"; // Script with multiple trailing newlines
@@ -95,5 +95,18 @@ public class BlankLineTests
 
         // Assert
         output.AssertEqual(["First", "Second"]);
+    }
+
+    [Fact]
+    public void EndsWithComment()
+    {
+        // Arrange
+        var script = "<< \"First\"\n# Comment";
+
+        // Act
+        var output = Utils.Execute(script);
+
+        // Assert
+        output.AssertEqual(["First"]);
     }
 }
