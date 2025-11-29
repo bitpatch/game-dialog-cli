@@ -2,7 +2,7 @@ using BitPatch.DialogLang;
 
 namespace DialogLang.Tests;
 
-public class MultistringParsingTests
+public class MultistringTokenTests
 {
     [Fact]
     public void SimpleString()
@@ -64,7 +64,7 @@ public class MultistringParsingTests
         var expected = new TokenSequence(
         [
             TokenType.Output, TokenType.StringStart,
-            TokenType.InlineString, TokenType.InlineExpressionStart, TokenType.InlineString, TokenType.InlineExpressionEnd,
+            TokenType.InlineString, TokenType.InlineExpressionStart, TokenType.InlineString, TokenType.InlineExpressionEnd, TokenType.InlineString,
             TokenType.InlineString, TokenType.StringEnd, TokenType.Newline,
             TokenType.EndOfSource
         ]);
@@ -75,5 +75,35 @@ public class MultistringParsingTests
         // Assert
         Assert.Equal(expected.Sequence, result);
 
+    }
+
+    [Fact]
+    public void InIfBlock()
+    {
+        // Arrange
+        var source = """"
+            if true
+                << """Hello,
+                   World!
+                   """
+            """";
+
+        var expected = new TokenSequence(
+        [
+            TokenType.If, TokenType.True, TokenType.Newline,
+            TokenType.Indent,
+                TokenType.Output, TokenType.StringStart,
+                    TokenType.InlineString,
+                    TokenType.InlineString,
+                TokenType.StringEnd, TokenType.Newline,
+            TokenType.Dedent,
+            TokenType.EndOfSource
+        ]);
+
+        // Act
+        var result = source.Tokenize();
+
+        // Assert
+        Assert.Equal(expected.Sequence, result);
     }
 }
