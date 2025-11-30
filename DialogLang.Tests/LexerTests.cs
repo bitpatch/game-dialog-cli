@@ -41,7 +41,7 @@ public class LexerTests
         var result = source.Tokenize();
 
         // Assert
-        Assert.Equal(expected, result.Select(t => t.Type));
+        Assert.Equal(expected, result);
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class LexerTests
         var result = source.Tokenize();
 
         // Assert
-        Assert.Equal(expected, result.Select(t => t.Type));
+        Assert.Equal(expected, result);
     }
 }
 

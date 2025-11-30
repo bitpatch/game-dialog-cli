@@ -29,10 +29,10 @@ internal static class Utils
     /// <summary>
     /// Tokenizes the given source code into a list of tokens.
     /// </summary>
-    public static List<Token> Tokenize(this string source)
+    public static TokenType[] Tokenize(this string source)
     {
         using var lexer = new Lexer(Source.Inline(source));
-        return [.. lexer.Tokenize()];
+        return [.. lexer.Tokenize().Select(t => t.Type)];
     }
 
     /// <summary>

@@ -1,9 +1,49 @@
+using BitPatch.DialogLang;
+
 namespace DialogLang.Tests;
 
 public class BlankLineTests
 {
     [Fact]
-    public void ScriptEndingWithBlankLine()
+    public void BlankLineParsing()
+    {
+        // Arrange
+        var script = "<< \"Hello!\"\n#Comment\n\t\t";
+
+        var expected = new[]
+        {
+            TokenType.Output, TokenType.StringStart, TokenType.InlineString, TokenType.StringEnd,
+            TokenType.Newline, TokenType.EndOfSource
+        };
+
+        // Act
+        var output = script.Tokenize();
+
+        // Assert
+        Assert.Equal(expected, output);
+    }
+
+    [Fact]
+    public void WhitespaceParsing()
+    {
+        // Arrange
+        var script = "<< \"Hello!\"\t\t";
+
+        var expected = new[]
+        {
+            TokenType.Output, TokenType.StringStart, TokenType.InlineString, TokenType.StringEnd,
+            TokenType.Newline, TokenType.EndOfSource
+        };
+
+        // Act
+        var output = script.Tokenize();
+
+        // Assert
+        Assert.Equal(expected, output);
+    }
+
+    [Fact]
+    public void EndsWithBlankLine()
     {
         // Arrange
         var script = "<< \"Hello!\"\n"; // Script with trailing newline
@@ -16,7 +56,7 @@ public class BlankLineTests
     }
 
     [Fact]
-    public void ScriptEndingWithMultipleBlankLines()
+    public void EndsWithMultiBlankLines()
     {
         // Arrange
         var script = "<< \"Hello!\"\n\n\n"; // Script with multiple trailing newlines
@@ -74,5 +114,44 @@ public class BlankLineTests
 
         // Assert
         output.AssertEqual(["First", "Second"]);
+    }
+
+    [Fact]
+    public void EndsWithComment()
+    {
+        // Arrange
+        var script = "<< \"First\"\n# Comment";
+
+        // Act
+        var output = Utils.Execute(script);
+
+        // Assert
+        output.AssertEqual(["First"]);
+    }
+
+    [Fact]
+    public void EndsWithCommentAndWhitespace()
+    {
+        // Arrange
+        var script = "<< \"First\"\n# Comment\n\t\t";
+
+        // Act
+        var output = Utils.Execute(script);
+
+        // Assert
+        output.AssertEqual(["First"]);
+    }
+
+    [Fact]
+    public void EndsWithWhitespace()
+    {
+        // Arrange
+        var script = "<< \"First\"\t\t";
+
+        // Act
+        var output = Utils.Execute(script);
+
+        // Assert
+        output.AssertEqual(["First"]);
     }
 }
