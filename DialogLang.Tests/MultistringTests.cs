@@ -12,6 +12,8 @@ public class MultistringTests
     [InlineData("<< \"\"\"{\"nested\"}\"\"\"", "nested")]
     [InlineData("<< \"\"\"{5 > 3}\"\"\"", "true")]
     [InlineData("<< \"\"\"Check: {5 > 3}\"\"\"", "Check: true")]
+    [InlineData("<< \"\"\"Check:\n  {5 > 3}\"\"\"", "Check:\ntrue")]
+    [InlineData("<< \"\"\"Check:\n  {5 > 3}\n   hello\"\"\"", "Check:\ntrue\n hello")]
     public void SimpleStrings(string source, string expected)
     {
         // Act
