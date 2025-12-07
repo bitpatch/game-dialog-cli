@@ -73,4 +73,3 @@ public class LexerTests
         Assert.Equal(expected, result);
     }
 }
-

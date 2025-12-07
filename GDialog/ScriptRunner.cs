@@ -25,9 +25,24 @@ internal static class ScriptRunner
 
         try
         {
-            foreach (var output in dialog.RunFile(scriptPath))
+            foreach (var runtimeItem in dialog.RunFile(scriptPath))
             {
-                Console.WriteLine(output);
+                switch (runtimeItem)
+                {
+                    case RuntimeValue value:
+                        Console.WriteLine(value);
+                        break;
+
+                    case RuntimeValueRequest request:
+                        Console.Write("> ");
+                        var input = Console.ReadLine() ?? "";
+                        request.Request(TypeParser.ParseValue(input));
+                        break;
+
+                    default:
+                        Console.Error.WriteLine($"Unknown runtime item: {runtimeItem.GetType().Name}");
+                        break;
+                }
             }
 
             if (showVariables)
