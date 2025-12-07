@@ -36,7 +36,7 @@ internal static class ScriptRunner
                     case RuntimeValueRequest request:
                         Console.Write("> ");
                         var input = Console.ReadLine() ?? "";
-                        request.Request(input);
+                        request.Request(TypeParser.ParseValue(input));
                         break;
 
                     default:
