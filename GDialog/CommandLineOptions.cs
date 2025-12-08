@@ -38,7 +38,7 @@ internal static class CommandLineOptions
         Console.WriteLine("  -v, --vars                    Display variables after script execution");
         Console.WriteLine("                                (used as: gdialog script.gds -v)");
         Console.WriteLine();
-        Console.WriteLine("For more information, visit: https://github.com/bitpatch/game-dialog-cli");
+        Console.WriteLine("For more information, visit: https://github.com/bitpatch/game-dialog");
         return 0;
     }
 

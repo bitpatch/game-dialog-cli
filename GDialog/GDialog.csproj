@@ -17,8 +17,8 @@
     <Authors>Bit Patch</Authors>
     <Description>Game Dialog Script Tool</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/bitpatch/game-dialog-cli</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/bitpatch/game-dialog-cli</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bitpatch/game-dialog</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/bitpatch/game-dialog</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Homebrew'">
