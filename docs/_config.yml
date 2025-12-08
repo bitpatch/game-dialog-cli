@@ -1,5 +1,5 @@
 title: Game Dialog
-description: A simple language for writing game dialogs with integrated logic
+description: A simple script language for writing game dialogs with integrated logic
 remote_theme: just-the-docs/just-the-docs
 
 url: https://bitpatch.github.io
@@ -11,8 +11,8 @@ aux_links:
 
 footer_content: "MIT License &copy; BitPatch"
 
-# GitHub-like colors and fonts
-color_scheme: github
+# Use built-in dark theme
+color_scheme: dark
 
 callouts:
   note:
