@@ -33,6 +33,15 @@
             "cwd": "${workspaceFolder}/GDialog",
             "console": "integratedTerminal",
             "stopAtEntry": false
+        },
+        {
+            "name": "Docs: Start",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/docs",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["start"],
+            "console": "integratedTerminal"
         }
     ]
 }
