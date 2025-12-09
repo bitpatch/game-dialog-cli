@@ -1,6 +1,6 @@
 using BitPatch.DialogLang.Ast;
 
-namespace DialogLang.Tests;
+namespace Lang.Tests;
 
 public class ParserTests
 {

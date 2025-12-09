@@ -1,4 +1,4 @@
-namespace DialogLang.Tests;
+namespace Lang.Tests;
 
 public class MultistringTests
 {

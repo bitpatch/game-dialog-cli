@@ -1,7 +1,7 @@
 using BitPatch.DialogLang;
 using Xunit.Abstractions;
 
-namespace DialogLang.Tests;
+namespace Lang.Tests;
 
 /// <summary>
 /// Represents a sequence of tokens for testing purposes.

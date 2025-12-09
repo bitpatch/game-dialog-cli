@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using BitPatch.DialogLang;
 
-namespace DialogLang.Tests;
+namespace Lang.Tests;
 
 internal static class Utils
 {

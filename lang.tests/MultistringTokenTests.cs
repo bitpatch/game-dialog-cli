@@ -1,6 +1,6 @@
 using BitPatch.DialogLang;
 
-namespace DialogLang.Tests;
+namespace Lang.Tests;
 
 public class MultistringTokenTests
 {

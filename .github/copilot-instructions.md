@@ -39,7 +39,7 @@ Command-line tool for running .gds script files.
   - `ScriptExecutor.cs` - Script execution with detailed error reporting
   - `CommandLineOptions.cs` - CLI argument parsing
 
-### DialogLang.Tests
+### lang.tests
 
 Unit tests for the interpreter using xUnit, with `Utils.Execute()` helper for streamlined testing.
 
@@ -92,7 +92,7 @@ The Game Dialog Script Language supports:
 ### Building and Testing
 
 - **Build**: Use VS Code's default build task or `dotnet build cli/cli.csproj`
-- **Tests**: Run all tests with `dotnet test DialogLang.Tests/`
+- **Tests**: Run all tests with `dotnet test lang.tests/`
 - **Local Testing**: Use `Utils.Execute("script")` in tests for quick execution
 - **CLI Testing**: Build then run `dotnet run --project cli script.gds`
 
